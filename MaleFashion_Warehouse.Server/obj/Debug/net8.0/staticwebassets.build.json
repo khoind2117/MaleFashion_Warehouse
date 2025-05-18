@@ -1,0 +1,23 @@
+{
+  "Version": 1,
+  "Hash": "kJwSat+kScQcfoITee20ipsXiZ0F3um4j3/s9VL3PA4=",
+  "Source": "MaleFashion_Warehouse.Server",
+  "BasePath": "_content/MaleFashion_Warehouse.Server",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [
+    {
+      "Identity": "D:\\Web Dev\\Intern_Project\\API\\MaleFashion_Warehouse\\malefashion_warehouse.client\\malefashion_warehouse.client.esproj",
+      "Version": 2,
+      "Source": "malefashion_warehouse.client",
+      "GetPublishAssetsTargets": "GetCurrentProjectPublishStaticWebAssetItems",
+      "AdditionalPublishProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier;SelfContained",
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier;SelfContained"
+    }
+  ],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

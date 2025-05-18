@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist/out-tsc",
+        "strict": true,
+        "noImplicitOverride": false,
+        "noPropertyAccessFromIndexSignature": false,
+        "noImplicitReturns": false,
+        "noFallthroughCasesInSwitch": true,
+        "esModuleInterop": true,
+        "useDefineForClassFields": false,
+
+        "target": "es2022",
+        "forceConsistentCasingInFileNames": true,
+        "downlevelIteration": true,
+        "allowSyntheticDefaultImports": true,
+        "strictPropertyInitialization": false,
+        "noImplicitAny": false,
+        "strictNullChecks": false,
+    },
+    "angularCompilerOptions": {
+        "enableI18nLegacyMessageIdFormat": false,
+        "strictInjectionParameters": true,
+        "strictInputAccessModifiers": true,
+        "strictTemplates": true
+    },
+    "extends": "./tsconfig.base.json"
+}

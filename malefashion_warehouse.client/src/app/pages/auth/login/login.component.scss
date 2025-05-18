@@ -1,0 +1,9 @@
+app-login {
+    .container-login {
+        .login-card {
+            width: 30rem;
+            border-radius: 0.5rem;
+            background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)
+        }
+    }
+}

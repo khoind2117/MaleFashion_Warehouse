@@ -1,0 +1,1 @@
+D:\Web Dev\Intern_Project\API\MaleFashion_Warehouse\malefashion_warehouse.client\obj\Debug\malefashion_warehouse.client.esproj.CoreCompileInputs.cache

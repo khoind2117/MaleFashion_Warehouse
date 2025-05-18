@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\MaleFashion_Warehouse.Server.props" />
+</Project>

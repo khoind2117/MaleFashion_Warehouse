@@ -141,7 +141,7 @@ app.set('trust proxy', 1);
     });
 
     app.get('/status', isLoggedIn, (req, res) => {
-        res.status(200).json({ statusCode: 200, isAuthentication: true });
+        res.status(200).json({ statusCode: 200, isAuthenticated: true });
     });
 
 /**********************
@@ -193,7 +193,6 @@ app.set('trust proxy', 1);
 
         function handlerApiRoute(req, res, next) {
             if (!req.isAuthenticated()) {
-                console.log('is not Authenticated!');
                 return next();
             }
 
@@ -258,7 +257,6 @@ app.set('trust proxy', 1);
     }
 
     app.post('/logout', (req, res) => {
-        console.log('logout');
         res.clearCookie('MFW_client');
 
         req.logout(function(err) {

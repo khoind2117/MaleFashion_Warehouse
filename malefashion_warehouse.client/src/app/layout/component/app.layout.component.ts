@@ -1,6 +1,6 @@
-import { Component, Renderer2, ViewChild } from '@angular/core';
+import {Component, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import {ActivatedRoute, NavigationEnd, Router, RouterModule} from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { AppSidebarComponent } from './app.sidebar.component';
 import { AppFooter } from './app.footer';
@@ -13,7 +13,7 @@ import {AppTopbarComponent} from "./app.topbar.component";
     imports: [CommonModule, AppTopbarComponent, AppSidebarComponent, RouterModule, AppFooter],
     templateUrl: './app.layout.component.html'
 })
-export class AppLayoutComponent {
+export class AppLayoutComponent implements OnInit, OnDestroy {
     overlayMenuOpenSubscription: Subscription;
 
     menuOutsideClickListener: any;
@@ -25,7 +25,8 @@ export class AppLayoutComponent {
     constructor(
         public layoutService: LayoutService,
         public renderer: Renderer2,
-        public router: Router
+        public router: Router,
+        private _route: ActivatedRoute,
     ) {
         this.overlayMenuOpenSubscription = this.layoutService.overlayOpen$.subscribe(() => {
             if (!this.menuOutsideClickListener) {
@@ -44,6 +45,12 @@ export class AppLayoutComponent {
         this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
             this.hideMenu();
         });
+    }
+
+    ngOnInit() {
+        this._route.queryParams.subscribe(param => {
+            void this.router.navigate(['/dashboard']);
+        })
     }
 
     isOutsideClicked(event: MouseEvent) {

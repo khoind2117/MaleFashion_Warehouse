@@ -19,14 +19,14 @@ export class AccountService {
 
     authenticate(identity: Account | null): void {
         this._userIdentity = identity;
-        this._authenticationState.next(this._userIdentity);
+        this._authenticationState.next(this._userIdentity)
     }
 
     identity(force?: boolean): Observable<Account | null> {
         if (!this.accountCache$ || force || !this.isAuthenticated()) {
             this.accountCache$ = this.fetch().pipe(
                 catchError(() => {
-                    this._router.navigate(['/invalid']);
+                    void this._router.navigate(['/invalid']);
                     return of(null);
                 }),
                 tap((account: Account | null) => {

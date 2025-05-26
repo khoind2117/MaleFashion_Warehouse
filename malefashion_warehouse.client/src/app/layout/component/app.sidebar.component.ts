@@ -5,7 +5,7 @@ import {Button} from "primeng/button";
 @Component({
     selector: 'app-sidebar',
     standalone: true,
-    imports: [AppMenuComponent, Button],
+    imports: [AppMenuComponent],
     templateUrl: './app.sidebar.component.html',
 })
 export class AppSidebarComponent {

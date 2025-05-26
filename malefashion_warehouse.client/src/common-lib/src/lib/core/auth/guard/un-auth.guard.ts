@@ -8,10 +8,14 @@ import {AuthService} from "@common-lib";
 export class UnAuthGuard {
     constructor(private _router: Router, private _authService: AuthService) {}
 
+    /**
+     * Guard to prevent authenticated users from accessing certain routes (e.g., login or sign up).
+     * Redirects logged-in users to the dashboard.
+     */
     canActivate(): boolean {
         const isLogin = this._authService.getIsAuthenticated();
         if (isLogin) {
-            this._router.navigate(['/dashboard']);
+            void this._router.navigate(['/dashboard']);
         }
         return true;
     }

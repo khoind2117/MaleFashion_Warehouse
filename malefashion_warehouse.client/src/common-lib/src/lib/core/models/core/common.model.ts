@@ -24,3 +24,13 @@ export enum ColsConfigMaster {
   RELEASE_DATE = 'releasedDate',
   RELEASE_BY = 'releasedBy',
 }
+
+export class MapRouting {
+    fullPath: string;
+    absolutePath: string;
+
+    constructor(rootPath: any, absolutePath: any) {
+        this.absolutePath = absolutePath || rootPath;
+        this.fullPath = absolutePath ? `/${rootPath}/${absolutePath}` : `/${rootPath}`;
+    }
+}

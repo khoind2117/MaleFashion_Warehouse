@@ -1,25 +1,42 @@
 import { Routes } from '@angular/router';
-import {DashboardComponent} from "./pages/dashboard/dashboard.component";
 import {AuthGuard, UnAuthGuard} from "@common-lib";
-import { AppLayoutComponent } from './layout/component/app.layout.component';
-
+import {AppLayoutComponent} from "./layout/component";
+import {ROUTING_MAPPING} from "./config/mapping-routing.config";
+import {DashboardComponent} from "./pages/dashboard/dashboard.component";
+import {RouteDataModel} from "../common-lib/src/lib/core/models/core/route-data.model";
 
 export const appRoutes: Routes = [
+    {
+        path: '',
+        redirectTo: ROUTING_MAPPING.dashboard.root.fullPath,
+        pathMatch: 'full',
+    },
     {
         path: '',
         component: AppLayoutComponent,
         children: [
             {
-                path: 'dashboard',
+                path: ROUTING_MAPPING.dashboard.root.absolutePath,
                 component: DashboardComponent,
-                // canActivate: [AuthGuard],
+                data: {
+                    activeTab: false,
+                    sidebarOverlay: false,
+                    authorities: [],
+                    isHomePage: true,
+                } as RouteDataModel,
+                canActivate: [AuthGuard],
             },
         ]
     },
     {
-        path: 'auth',
+        path: ROUTING_MAPPING.auth.root.absolutePath,
         loadChildren: () =>
             import('./pages/auth/auth.routes').then((m) => m.authRoutes),
         canActivate: [UnAuthGuard],
     },
+    {
+        path: '**',
+        pathMatch: 'full',
+        redirectTo: 'error/404',
+    }
 ];

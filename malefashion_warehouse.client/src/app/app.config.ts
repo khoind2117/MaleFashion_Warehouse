@@ -1,13 +1,12 @@
-import {provideHttpClient, withInterceptors, withInterceptorsFromDi} from '@angular/common/http';
-import {ApplicationConfig, importProvidersFrom} from '@angular/core';
+import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
+import {ApplicationConfig, inject, provideAppInitializer} from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideRouter, RouterModule, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
-import {FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import {ErrorInterceptor, JwtInterceptor } from 'src/common-lib/src/lib/core/auth/interceptors';
+import {AccountService, ServerErrorInterceptor} from "@common-lib";
+import {firstValueFrom, take} from "rxjs";
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -29,16 +28,13 @@ export const appConfig: ApplicationConfig = {
       }
     }),
 
-    importProvidersFrom(
-      RouterModule.forRoot(appRoutes),
-      CommonModule,
-      FormsModule,
-      ReactiveFormsModule,
-    ),
-
-    // Interceptor
-    // provideHttpClient(
-    //   withInterceptors([JwtInterceptor, ErrorInterceptor])
-    // ),
-  ]
+        /**
+         * Preloads and caches the current user identity at app startup using AppInitializer.
+         * This avoids delays or retries in route guards by ensuring user identity is ready early.
+         */
+        provideAppInitializer(() => {
+            const accountService = inject(AccountService);
+            return firstValueFrom(accountService.identity(true).pipe(take(1)));
+        }),
+    ]
 };

@@ -9,24 +9,28 @@ import {AccountService, ServerErrorInterceptor} from "@common-lib";
 import {firstValueFrom, take} from "rxjs";
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideRouter(appRoutes,
-      withInMemoryScrolling({
-        anchorScrolling: 'enabled',
-        scrollPositionRestoration: 'enabled'
-      }),
-      withEnabledBlockingInitialNavigation()
-    ),
-    provideHttpClient(withInterceptorsFromDi()),
-    provideAnimationsAsync(),
-    providePrimeNG({
-      theme: {
-        preset: Aura,
-        options: {
-          darkModeSelector: '.app-dark'
-        }
-      }
-    }),
+    providers: [
+        // Router
+        provideRouter(appRoutes),
+
+        // HttpClient + Interceptors from DI
+        provideHttpClient(
+          withInterceptorsFromDi()
+        ),
+        { provide: HTTP_INTERCEPTORS, useClass: ServerErrorInterceptor, multi: true },
+
+        // Animations (async)
+        provideAnimationsAsync(),
+
+        // PrimeNG theme
+        providePrimeNG({
+            theme: {
+                preset: Aura,
+                options: {
+                    darkModeSelector: '.app-dark'
+                }
+            }
+        }),
 
         /**
          * Preloads and caches the current user identity at app startup using AppInitializer.

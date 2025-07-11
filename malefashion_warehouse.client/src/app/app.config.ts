@@ -7,6 +7,7 @@ import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import {AccountService, ServerErrorInterceptor} from "@common-lib";
 import {firstValueFrom, take} from "rxjs";
+import {MessageService} from "primeng/api";
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -31,6 +32,9 @@ export const appConfig: ApplicationConfig = {
                 }
             }
         }),
+
+        // PrimeNG Message Service for Notification Service
+        MessageService,
 
         /**
          * Preloads and caches the current user identity at app startup using AppInitializer.

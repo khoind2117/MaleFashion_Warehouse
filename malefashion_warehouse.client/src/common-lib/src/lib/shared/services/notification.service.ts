@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {MessageService} from "primeng/api";
 import {Message} from "primeng/message";
-import {NotificationSeverity} from "../../core";
+import {Severity} from "../../core";
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +11,7 @@ export class NotificationService {
         private _messageService: MessageService,
     ){}
 
-    show(severity: NotificationSeverity, summary: string, detail?: string, config?: Partial<Message>){
+    show(severity: Severity, summary: string, detail?: string, config?: Partial<Message>){
         this._messageService.add({
             severity,
             summary,

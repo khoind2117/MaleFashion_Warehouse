@@ -51,39 +51,45 @@ export class MasterRequestPageable {
   [key: string]: SafeAny;
 
   constructor(
-    params: Pageable,
+    params: Pageable = {},
     moveKeysToParent: string[] = [],
     isSortUpdateDateDefault = false,
     valueSortDefault = ColsConfigMaster.UPDATED_DATE,
     isNoPage = false
   ) {
-    // parse model filter of primeng to my custom filter
-    if (params?.filters) {
-      this.criteria = Object.entries(params?.filters).reduce((rev, [key, obj]) => {
-        if (!moveKeysToParent?.find((k) => k === key)) {
+    params = params || {};
+
+    // Parse filters
+    const filters = params.filters || {};
+    this.criteria = Object.entries(filters).reduce((rev, [key, obj]) => {
+      if (!moveKeysToParent.includes(key)) {
+          const value = (obj as Filter).value;
           return {
-            ...rev,
-            [key]: (obj as Filter).value !== false ? (obj as Filter).value || undefined : false,
+              ...rev,
+              [key]: value !== false ? value || undefined : false,
           };
-        }
-        return rev;
-      }, {});
-    }
+      }
+      return rev;
+    }, {});
+
     this.page = params.page || 0;
     this.size = params.size || TABLE_CONFIG.ROWS;
-    if (params?.sortField) {
-      this.sortBy = params?.sortField || undefined;
-      this.sortDirection = params?.sortOrder === 1 ? SortEnum.ASC : SortEnum.DESC;
-    }
-    // default sort by updated by
-    if (!params?.sortField && isSortUpdateDateDefault) {
+
+    // Sort logic
+    if (params?.sortField && params?.sortOrder !== 0) {
+      this.sortBy = params.sortField;
+      this.sortDirection = params.sortOrder === 1 ? SortEnum.ASC : SortEnum.DESC;
+    } else if (isSortUpdateDateDefault) {
       this.sortBy = valueSortDefault;
       this.sortDirection = SortEnum.DESC;
     }
+
+    // Move keys to parent
     moveKeysToParent?.forEach((key) => {
       this[key] = (params?.filters[key] as Filter)?.value || undefined;
     });
 
+    // Remove pagination if needed
     if (isNoPage) {
       delete this.page;
       delete this.size;

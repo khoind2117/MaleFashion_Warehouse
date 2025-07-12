@@ -1,8 +1,8 @@
-export enum NotificationSeverity {
+export enum Severity {
     SUCCESS = 'success',
     INFO = 'info',
     WARN = 'warn',
-    ERROR = 'error',
+    DANGER = 'danger',
     SECONDARY = 'secondary',
     CONTRAST = 'contrast',
 }

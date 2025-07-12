@@ -1,12 +1,17 @@
 import {Component, OnInit} from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterModule} from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { CheckboxModule } from 'primeng/checkbox';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
-import { RippleModule } from 'primeng/ripple';
-import {AccountService, AuthService, DestroyService} from "@common-lib";
+import {ButtonModule} from 'primeng/button';
+import {CheckboxModule} from 'primeng/checkbox';
+import {InputTextModule} from 'primeng/inputtext';
+import {PasswordModule} from 'primeng/password';
+import {RippleModule} from 'primeng/ripple';
+import {
+    AccountService,
+    AuthService,
+    DestroyService,
+    NotificationService, Severity,
+} from "@common-lib";
 import {FloatLabel} from "primeng/floatlabel";
 
 export interface Credentials {
@@ -40,6 +45,7 @@ export class LoginComponent implements OnInit {
 
     constructor(
         private _router: Router,
+        private _notificationService: NotificationService,
         private _authService: AuthService,
         private _accountService: AccountService,
     ) {}
@@ -59,18 +65,39 @@ export class LoginComponent implements OnInit {
                     this._accountService.identity(true).subscribe({
                         next: (user) => {
                             if (user) {
+                                this._notificationService.show(
+                                    Severity.SUCCESS,
+                                    'Login successful',
+                                    `Welcome back, ${user.firstName}!`,
+                                );
                                 this._router.navigate(['/dashboard']);
                             } else {
-                                console.error('❌ Không thể lấy thông tin người dùng.');
+                                this._notificationService.show(
+                                    Severity.DANGER,
+                                    'Authentication error',
+                                    'Unable to fetch user information.',
+                                );
                             }
                         },
                         error: (err) => {
-                            console.error('❌ Lỗi khi lấy thông tin người dùng:', err);
+                            this._notificationService.show(
+                                Severity.DANGER,
+                                'System error',
+                                'Failed to retrieve user details.',
+                                { life: 5000 }
+                            );
+                            console.error(err);
                         }
                     });
                 },
                 error: (err) => {
-                    console.error('Login failed:', err);
+                    this._notificationService.show(
+                        Severity.DANGER,
+                        'Login failed',
+                        'Invalid username or password.',
+                        { life: 5000 }
+                    );
+                    console.error(err);
                 }
             });
         } else {

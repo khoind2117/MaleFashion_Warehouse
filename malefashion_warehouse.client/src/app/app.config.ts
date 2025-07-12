@@ -2,12 +2,12 @@ import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@ang
 import {ApplicationConfig, inject, provideAppInitializer} from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
-import Aura from '@primeng/themes/aura';
+import Nora from '@primeng/themes/nora';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import {AccountService, ServerErrorInterceptor} from "@common-lib";
 import {firstValueFrom, take} from "rxjs";
-import {MessageService} from "primeng/api";
+import {ConfirmationService, MessageService} from "primeng/api";
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -26,7 +26,7 @@ export const appConfig: ApplicationConfig = {
         // PrimeNG theme
         providePrimeNG({
             theme: {
-                preset: Aura,
+                preset: Nora,
                 options: {
                     darkModeSelector: '.app-dark'
                 }
@@ -35,6 +35,8 @@ export const appConfig: ApplicationConfig = {
 
         // PrimeNG Message Service for Notification Service
         MessageService,
+        // PrimeNG Confirmation Service for Confirm Dialog Service
+        ConfirmationService,
 
         /**
          * Preloads and caches the current user identity at app startup using AppInitializer.

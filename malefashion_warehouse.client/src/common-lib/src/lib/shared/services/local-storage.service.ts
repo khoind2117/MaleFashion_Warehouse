@@ -5,15 +5,25 @@ import {SafeAny} from "../../core";
   providedIn: 'root',
 })
 export class LocalStorageService {
-  set(name: string, value: SafeAny) {
-    localStorage.setItem(name, value);
-  }
+    get<T = any>(key: string): T | null {
+        try {
+            const data = localStorage.getItem(key);
+            return data ? (JSON.parse(data) as T) : null;
+        } catch (e) {
+            console.error('LocalStorage Get Error:', e);
+            return null;
+        }
+    }
 
-  get(name: string) {
-    return localStorage.getItem(name) || '{}';
-  }
+    set(key: string, value: any): void {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch (e) {
+            console.error('LocalStorage Set Error:', e);
+        }
+    }
 
-  clear(name: string) {
-    return localStorage.removeItem(name);
-  }
+    clear(key: string): void {
+        localStorage.removeItem(key);
+    }
 }

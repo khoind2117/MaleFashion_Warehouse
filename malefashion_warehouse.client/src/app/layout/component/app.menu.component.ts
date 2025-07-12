@@ -42,8 +42,13 @@ export class AppMenuComponent implements OnInit {
         })
     }
 
-    logout() {
-        this._authService.logout.subscribe();
-        this._authService.setIsAuthenticated(false);
+    openLogoutConfirmDialog() {
+        this._confirmDialogService.show({
+            message: 'Are you sure you want to logout?',
+            onAccept: () => {
+                this._authService.logout.subscribe();
+                this._authService.setIsAuthenticated(false);
+            }
+        })
     }
 }

@@ -1,11 +1,19 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewEncapsulation} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import {Account, AccountService, AuthService} from "@common-lib";
+import {Account, AccountService, AuthService, LoadingComponent} from "@common-lib";
+import {ToastModule} from "primeng/toast";
+import {ConfirmDialog} from "primeng/confirmdialog";
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  imports: [RouterOutlet]
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    imports: [
+        RouterOutlet,
+        LoadingComponent,
+        ToastModule,
+        ConfirmDialog,
+    ],
 })
 export class AppComponent implements OnInit {
     constructor(

@@ -25,6 +25,7 @@
         "@angular/router": "^19.2.2",
         "@primeng/themes": "^19.0.5",
         "chart.js": "4.4.8",
+        "date-fns": "^4.1.0",
         "passport": "^0.7.0",
         "primeclt": "^0.1.5",
         "primeicons": "^7.0.0",

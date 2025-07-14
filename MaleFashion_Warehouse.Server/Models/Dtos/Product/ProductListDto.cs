@@ -1,17 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using MaleFashion_Warehouse.Server.Models.Dtos.SubCategory;
 
-namespace MaleFashion_Warehouse.Server.Models.Dtos.ProductVariant
+namespace MaleFashion_Warehouse.Server.Models.Dtos.Product
 {
-    public class ProductDto
+    public class ProductListDto
     {
         public int Id { get; set; }
         public string? Name { get; set; }
         public string? Slug { get; set; }
         public string? Description { get; set; }
-        [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
-        public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public bool IsActive { get; set; }
+
+        public string? SubCategoryName { get; set; }
     }
 }

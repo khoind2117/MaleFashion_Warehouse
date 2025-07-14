@@ -7,16 +7,19 @@ namespace MaleFashion_Warehouse.Server.Repositories.Implementations
     {
         private readonly ApplicationDbContext _context;
         public IAuthRepository AuthRepository { get; }
-        public IProductRepository ProductRepository { get; }
+        public IProductsRepository ProductRepository { get; }
+        public IProductVariantsRepository ProductVariantsRepository { get; }
 
         public UnitOfWork(
             ApplicationDbContext context,
             IAuthRepository authRepository,
-            IProductRepository productRepository)
+            IProductsRepository productRepository,
+            IProductVariantsRepository productVariantsRepository)
         {
             _context = context;
             AuthRepository = authRepository;
             ProductRepository = productRepository;
+            ProductVariantsRepository = productVariantsRepository;
         }
 
         public async Task BeginTransactionAsync() => await _context.Database.BeginTransactionAsync();

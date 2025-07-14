@@ -10,11 +10,13 @@ namespace MaleFashion_Warehouse.Server.Models.Dtos.Product
         public required string Name { get; set; }
         public required string Slug { get; set; }
         public string? Description { get; set; }
-        [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public bool IsActive { get; set; }
 
-        public SubCategoryDto? SubCategoryDto { get; set; }
+        public int? SubCategoryId { get; set; }
+        public SubCategoryDto? SubCategory { get; set; }
 
-        public ICollection<ProductVariantDto>? ProductVariantDtos { get; set; }
+        public ICollection<ProductVariantDetailDto>? ProductVariants { get; set; }
     }
 }

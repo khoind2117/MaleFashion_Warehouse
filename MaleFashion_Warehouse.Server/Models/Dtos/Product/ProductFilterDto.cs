@@ -2,12 +2,12 @@
 
 namespace MaleFashion_Warehouse.Server.Models.Dtos.Product
 {
-    public class ProductFilterDto : FilterBase
+    public class ProductFilterDto
     {
-        public string? SortBy { get; set; }
-        public int? MainCategoryId { get; set; }
-        public int? SubCategoryId { get; set; }
-        public int? SizeId { get; set; }
-        public int? ColorId { get; set; }
+
+        public string? Name { get; set; }
+        public decimal? Price { get; set; }
+        public string? SubCategoryName { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using MaleFashion_Warehouse.Server.Models.Dtos.ProductVariant;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MaleFashion_Warehouse.Server.Models.Dtos.Product
 {
@@ -10,5 +11,7 @@ namespace MaleFashion_Warehouse.Server.Models.Dtos.Product
         public decimal Price { get; set; }
 
         public int? SubCategoryId { get; set; }
+
+        public required List<ProductVariantRequestDto> ProductVariants { get; set; }
     }
 }

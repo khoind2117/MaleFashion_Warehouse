@@ -1,0 +1,49 @@
+## Build folders (bin and obj)
+bin/
+obj/
+
+## User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+## Visual Studio Code
+.vscode/
+
+## Build results
+*.dll
+*.exe
+*.app
+*.log
+*.cache
+*.pdb
+
+## ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+## .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Others
+*.dbmdl
+*.bak
+*.sql
+*.sqlite
+
+## NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+*.psmdcp
+packages/
+.nuget/
+
+## Rider / JetBrains IDEs
+.idea/
+
+## OS-specific
+.DS_Store
+Thumbs.db

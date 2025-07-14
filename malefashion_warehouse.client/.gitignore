@@ -8,6 +8,7 @@
 
 # Node
 /node_modules
+/server/node_modules
 npm-debug.log
 yarn-error.log
 
@@ -41,6 +42,12 @@ testem.log
 .DS_Store
 Thumbs.db
 
+# Nx workspace
 .nx/cache
 .nx/workspace-data
+
+# Angular temporary folder
 .angular
+
+# VS Debug folder
+/obj

@@ -1,14 +1,27 @@
-﻿namespace MaleFashion_Warehouse.Server.Repositories.Interfaces
+﻿using MaleFashion_Warehouse.Server.Common.Dtos;
+using System.Linq.Expressions;
+
+namespace MaleFashion_Warehouse.Server.Repositories.Interfaces
 {
     public interface IGenericRepository<TEntity>
         where TEntity : class
     {
-        Task<TEntity?> AddAsync(TEntity entity);
+        // CRUD
+        Task<TEntity?> CreateAsync(TEntity entity);
+        Task<bool> CreateManyAsync(IEnumerable<TEntity> entities);
         Task<bool> UpdateAsync(TEntity entity);
-        Task<bool> DeleteAsync(object id);
-        Task<bool> AddRangeAsync(IEnumerable<TEntity> entities);
-        Task<bool> ExistsAsync(object id);
-        Task<TEntity?> GetByIdAsync(object id);
-        Task<IEnumerable<TEntity?>> GetAllAsync(Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeFunc = null);
+        Task<bool> DeleteAsync(object id);  
+        Task<bool> DeleteManyAsync(IEnumerable<object> ids);
+
+        Task<TEntity?> GetByIdAsync(
+            object id,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null
+        );
+        Task<PageableResponse<TEntity>> GetPagedAsync<TFilter>(
+            PagableRequest<TFilter> pagableRequest,
+            Func<TFilter?, IQueryable<TEntity>, IQueryable<TEntity>>? filter = null,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null
+        );
     }
 }

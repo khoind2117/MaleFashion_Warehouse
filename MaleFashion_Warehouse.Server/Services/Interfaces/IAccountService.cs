@@ -6,6 +6,6 @@ namespace MaleFashion_Warehouse.Server.Services.Interfaces
 {
     public interface IAccountService
     {
-        Task<ResponseApi<UserDto>> GetUserIdentity(ClaimsPrincipal user);
+        Task<ResponseApi<Account>> GetUserIdentity(ClaimsPrincipal user);
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace MaleFashion_Warehouse.Server.Models.Dtos.User
 {
-    public class UserDto
+    public class Account
     {
         public string? Id { get; set; }
         public string? FirstName { get; set; }

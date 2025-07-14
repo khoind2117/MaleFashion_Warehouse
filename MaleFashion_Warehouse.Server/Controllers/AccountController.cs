@@ -16,7 +16,8 @@ namespace MaleFashion_Warehouse.Server.Controllers
             _accountService = accountService;
         }
 
-        [HttpGet("info")]
+        [HttpGet]
+        [Route("info")]
         public async Task<IActionResult> GetUserIdentity()
         {
             try
@@ -45,9 +46,8 @@ namespace MaleFashion_Warehouse.Server.Controllers
                     Status = 500,
                     Success = false,
                     Message = "An error occurred",
-                    Error = ex.ToString(),
                 });
             }
-        }   
+        }
     }
 }

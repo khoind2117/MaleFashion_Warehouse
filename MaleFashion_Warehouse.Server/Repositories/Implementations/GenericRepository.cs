@@ -1,5 +1,8 @@
-﻿using MaleFashion_Warehouse.Server.Repositories.Interfaces;
+﻿using MaleFashion_Warehouse.Server.Common.Dtos;
+using MaleFashion_Warehouse.Server.Common.Enums;
+using MaleFashion_Warehouse.Server.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace MaleFashion_Warehouse.Server.Repositories.Implementations
 {
@@ -15,56 +18,145 @@ namespace MaleFashion_Warehouse.Server.Repositories.Implementations
             _context = context;
             _dbSet = context.Set<TEntity>();
         }
-        public async Task<TEntity?> AddAsync(TEntity entity)
+
+        #region CRUD
+        public async Task<TEntity?> CreateAsync(TEntity entity)
         {
-            await _dbSet.AddAsync(entity);
-            return entity;
+            var entry = await _dbSet.AddAsync(entity);
+            await _context.SaveChangesAsync();
+            return entry.Entity;
         }
 
-        public Task<bool> UpdateAsync(TEntity entity)
+        public async Task<bool> CreateManyAsync(IEnumerable<TEntity> entities)
+        {
+            await _dbSet.AddRangeAsync(entities);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> UpdateAsync(TEntity entity)
         {
             _dbSet.Update(entity);
-            return Task.FromResult(true);
+            return await _context.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> DeleteAsync(object id)
         {
             var entity = await _dbSet.FindAsync(id);
-            if (entity != null)
+            if (entity == null)
             {
-                _dbSet.Remove(entity);
-                return true;
+                return false;
             }
-            return false;
+
+            _dbSet.Remove(entity);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> AddRangeAsync(IEnumerable<TEntity> entities)
+        public async Task<bool> DeleteManyAsync(IEnumerable<object> ids)
         {
-            await _dbSet.AddRangeAsync(entities);
-            return true;
-        }
+            var entities = await _dbSet
+                .Where(e => ids.Contains(EF.Property<object>(e, "Id"))).ToListAsync();
 
-        public async Task<bool> ExistsAsync(object id)
-        {
-            var entity = await _dbSet.FindAsync(id);
-            return entity != null;
-        }
+            if (!entities.Any())
+            {
+                return false;
+            }
 
-        public async Task<TEntity?> GetByIdAsync(object id)
-        {
-            return await _dbSet.FindAsync(id);
+            _dbSet.RemoveRange(entities);
+            return await _context.SaveChangesAsync() > 0;
         }
+        #endregion
 
-        public async Task<IEnumerable<TEntity?>> GetAllAsync(Func<IQueryable<TEntity>, IQueryable<TEntity>>? includeFunc = null)
+        public async Task<TEntity?> GetByIdAsync(
+            object id,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null
+        )
         {
             IQueryable<TEntity> query = _dbSet;
 
-            if (includeFunc != null)
+            // Apply includes
+            if (include != null)
             {
-                query = includeFunc(query);
+                query = include(query);
             }
 
-            return await query.ToListAsync();
+            return await query.FirstOrDefaultAsync(e => EF.Property<object>(e, "Id").Equals(id));
+        }
+
+        public async Task<PageableResponse<TEntity>> GetPagedAsync<TFilter>(
+            PagableRequest<TFilter> pagableRequest,
+            Func<TFilter?, IQueryable<TEntity>, IQueryable<TEntity>>? filter = null,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null
+        )
+        {
+            IQueryable<TEntity> query = _dbSet;
+
+            // Apply includes
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            // Apply filter
+            if (filter != null)
+            {
+                query = filter(pagableRequest.Criteria, query);
+            }
+
+            // Apply sorting
+            if (!string.IsNullOrWhiteSpace(pagableRequest.SortBy))
+            {
+                var param = Expression.Parameter(typeof(TEntity), "x");
+                var property = Expression.PropertyOrField(param, pagableRequest.SortBy);
+                var lambda = Expression.Lambda(property, param);
+
+                string methodName = pagableRequest.SortDirection == SortEnum.DESC ? "OrderByDescending" : "OrderBy";
+
+                var method = typeof(Queryable).GetMethods()
+                    .First(m => m.Name == methodName
+                             && m.GetParameters().Length == 2)
+                    .MakeGenericMethod(typeof(TEntity), property.Type);
+
+                query = (IOrderedQueryable<TEntity>)method.Invoke(null, new object[] { query, lambda })!;
+            }
+            else if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            // Pagination
+            int page = pagableRequest.Page;
+            int size = pagableRequest.Size;
+            int skip = page * size; // 0-based indexing
+
+            int totalCount = await query.CountAsync();
+            var items = await query.Skip(skip).Take(size).ToListAsync();
+
+            return new PageableResponse<TEntity>
+            {
+                Content = items,
+                Empty = !items.Any(),
+                First = page == 1,
+                Last = skip + items.Count >= totalCount,
+                Size = size,
+                Number = page,
+                NumberOfElements = items.Count,
+                Pageable = new Pageable
+                {
+                    Offset = skip,
+                    PageNumber = page,
+                    PageSize = size,
+                    Paged = true,
+                },
+                Sort = new Sort
+                {
+                    Empty = !items.Any(),
+                    Sorted = !string.IsNullOrWhiteSpace(pagableRequest.SortBy),
+                    Unsorted = string.IsNullOrWhiteSpace(pagableRequest.SortBy),
+                },
+                TotalElements = totalCount,
+                TotalPages = (int)Math.Ceiling((double)totalCount / size)
+            };
         }
     }
 }

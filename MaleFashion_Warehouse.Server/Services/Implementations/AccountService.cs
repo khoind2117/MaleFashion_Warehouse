@@ -17,22 +17,21 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
             _userManager = userManager;
         }
 
-        public async Task<ResponseApi<UserDto>> GetUserIdentity(ClaimsPrincipal userPrincipal)
+        public async Task<ResponseApi<Account>> GetUserIdentity(ClaimsPrincipal userPrincipal)
         {
             var currentUser = await _userManager.GetUserAsync(userPrincipal);
 
             if (currentUser == null)
             {
-                return new ResponseApi<UserDto>
+                return new ResponseApi<Account>
                 {
                     Status = 404,
                     Success = false,
                     Message = "User not found",
-                    Error = "User with the provided ID not found",
                 };
             }
 
-            var userDto = new UserDto
+            var userDto = new Account
             {
                 Id = currentUser.Id,
                 FirstName = currentUser.FirstName,
@@ -42,7 +41,7 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                 Address = currentUser.Address,
             };
 
-            return new ResponseApi<UserDto>
+            return new ResponseApi<Account>
             {
                 Status = 200,
                 Success = true,
@@ -50,5 +49,7 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                 Data = userDto,
             };
         }
+
+
     }
 }

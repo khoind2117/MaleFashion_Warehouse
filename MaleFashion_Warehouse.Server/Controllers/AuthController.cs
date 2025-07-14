@@ -31,7 +31,6 @@ namespace MaleFashion_Warehouse.Server.Controllers
                     Status = 403,
                     Success = false,
                     Message = "service_unauthorized",
-                    Error = "ModelState is invalid",
                     Data = ModelState,
                 };
 
@@ -55,7 +54,6 @@ namespace MaleFashion_Warehouse.Server.Controllers
                     Status = 500,
                     Success = false,
                     Message = "An error occurred",
-                    Error = ex.ToString(),
                 });
             }
         }
@@ -77,7 +75,6 @@ namespace MaleFashion_Warehouse.Server.Controllers
                     Status = 500,
                     Success = false,
                     Message = "An error occurred",
-                    Error = ex.ToString(),
                 });
             }
         }

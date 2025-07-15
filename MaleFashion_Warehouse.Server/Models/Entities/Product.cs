@@ -1,29 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MaleFashion_Warehouse.Server.Common.Enums;
 
 namespace MaleFashion_Warehouse.Server.Models.Entities;
 
-public partial class Product
+public class Product
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
-
-    public string Slug { get; set; } = null!;
+    public required string Name { get; set; }
+    
+    public string? Slug { get; set; }
+    
+    public Category Category {  get; set; } 
 
     public string? Description { get; set; }
 
-    public decimal Price { get; set; }
+    public DateTimeOffset CreatedDate { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTimeOffset UpdatedDate { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    public ProductStatus Status { get; set; }
 
-    public bool IsActive { get; set; }
-
-    public int? SubCategoryId { get; set; }
-
+    public virtual ICollection<ProductPrice> ProductPrices { get; set; } = new List<ProductPrice>();
+    
     public virtual ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
-
-    public virtual SubCategory? SubCategory { get; set; }
 }

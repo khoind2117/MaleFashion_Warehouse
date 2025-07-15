@@ -161,13 +161,16 @@ builder.Services.AddRouting(options =>
 #region Repository and Service Registrations
 // Repositories
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
 builder.Services.AddScoped<IProductVariantsRepository, ProductVariantRepository>();
+builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
 // Service
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IProductsService, ProductsService>();
+builder.Services.AddScoped<IOrdersService, OrdersService>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 #endregion
@@ -176,7 +179,32 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<SlugUtil>();
 #endregion
 
+#region Register Seed Service
+builder.Services.AddTransient<Seed>();
+#endregion
+
 var app = builder.Build();
+
+// Run data seeding when executing: dotnet run seeddata.
+// App will stop running after seeding finishes.
+#region Data Seeding
+if (args.Length == 1 && args[0].ToLower() == "seeddata")
+{
+    await SeedData(app);
+    return;
+}
+
+async Task SeedData(IHost app)
+{
+    var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
+
+    using (var scope = scopedFactory.CreateScope())
+    {
+        var service = scope.ServiceProvider.GetService<Seed>();
+        await service.SeedApplicationDbContextAsync();
+    }
+}
+#endregion
 
 app.UseDefaultFiles();
 app.UseStaticFiles();

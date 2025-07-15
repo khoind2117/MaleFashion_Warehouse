@@ -1,30 +1,34 @@
 ﻿using MaleFashion_Warehouse.Server.Common.Enums;
-using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MaleFashion_Warehouse.Server.Models.Entities;
 
-public partial class Order
+public class Order
 {
     public int Id { get; set; }
 
-    public string FirstName { get; set; } = null!;
+    public required string FirstName { get; set; }
 
-    public string LastName { get; set; } = null!;
+    public required string LastName { get; set; }
 
-    public string Address { get; set; } = null!;
+    public required string Address { get; set; }
 
-    public string PhoneNumber { get; set; } = null!;
+    public required string PhoneNumber { get; set; }
 
-    public string Email { get; set; } = null!;
+    public required string Email { get; set; }
 
     public string? Note { get; set; }
 
-    public string PaymentMethod { get; set; } = null!;
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal Total { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public Currency Currency { get; set; }
 
+    public PaymentMethod PaymentMethod { get; set; }
+    
     public OrderStatus OrderStatus { get; set; }
+    
+    public DateTimeOffset CreatedDate { get; set; }
 
     public string? UserId { get; set; }
     public virtual User? User { get; set; }

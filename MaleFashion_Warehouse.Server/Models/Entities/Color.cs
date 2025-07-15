@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace MaleFashion_Warehouse.Server.Models.Entities;
 
-namespace MaleFashion_Warehouse.Server.Models.Entities;
-
-public partial class Color
+public class Color
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public required string Name { get; set; }
 
-    public string ColorCode { get; set; } = null!;
+    public required string ColorHex { get; set; }
 
     public virtual ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
 }

@@ -1,162 +1,172 @@
 ﻿using System;
 using System.Collections.Generic;
+using MaleFashion_Warehouse.Server.Common.Enums;
 using MaleFashion_Warehouse.Server.Models.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace MaleFashion_Warehouse.Server.Data;
 
-public partial class ApplicationDbContext : IdentityDbContext<User>
+public class ApplicationDbContext : IdentityDbContext<User>
 {
-    public ApplicationDbContext()
-    {
-    }
-
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
 
-    public virtual DbSet<Cart> Carts { get; set; }
+    #region DbSet
+    public DbSet<Cart> Carts { get; set; }
 
-    public virtual DbSet<CartItem> CartItems { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
 
-    public virtual DbSet<Color> Colors { get; set; }
+    public DbSet<Order> Orders { get; set; }
 
-    public virtual DbSet<Favorite> Favorites { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
 
-    public virtual DbSet<MainCategory> MainCategories { get; set; }
+    public DbSet<Product> Products { get; set; }
 
-    public virtual DbSet<Order> Orders { get; set; }
+    public DbSet<ProductPrice> ProductPrices { get; set; }
 
-    public virtual DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<ProductVariant> ProductVariants { get; set; }
 
-    public virtual DbSet<Product> Products { get; set; }
-
-    public virtual DbSet<ProductVariant> ProductVariants { get; set; }
-
-    public virtual DbSet<Size> Sizes { get; set; }
-
-    public virtual DbSet<SubCategory> SubCategories { get; set; }
+    public DbSet<Color> Colors { get; set; }
+    #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
+        #region FluentAPI
+        // Rename Identity tables to remove 'AspNet' prefix and keep naming consistent
+        modelBuilder.Entity<User>().ToTable("Users");
+        modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins");
+        modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaims");
+        modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
+        modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
+        modelBuilder.Entity<IdentityRole>().ToTable("Roles");
+        modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
+
+        // User
+        modelBuilder.Entity<User>(entity =>
+        {
+            // One-to-many relationship with Order
+            entity.HasMany(u => u.Orders)
+                .WithOne(o => o.User)
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Cart
         modelBuilder.Entity<Cart>(entity =>
         {
-            entity.ToTable("Cart");
+            entity.ToTable("Cart").HasKey(c => c.Id);
 
-            entity.HasIndex(e => e.UserId, "IX_Cart_UserId")
-                .IsUnique()
-                .HasFilter("([UserId] IS NOT NULL)");
+            // One-to-one relationship with User
+            entity.HasOne(c => c.User)
+                .WithOne(u => u.Cart)
+                .HasForeignKey<Cart>(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasOne(d => d.User).WithOne(p => p.Cart).HasForeignKey<Cart>(d => d.UserId);
-        });
-
-        modelBuilder.Entity<CartItem>(entity =>
-        {
-            entity.ToTable("CartItem");
-
-            entity.HasIndex(e => e.CartId, "IX_CartItem_CartId");
-
-            entity.HasIndex(e => e.ProductVariantId, "IX_CartItem_ProductVariantId");
-
-            entity.HasOne(d => d.Cart).WithMany(p => p.CartItems).HasForeignKey(d => d.CartId);
-
-            entity.HasOne(d => d.ProductVariant).WithMany(p => p.CartItems).HasForeignKey(d => d.ProductVariantId);
-        });
-
-        modelBuilder.Entity<Color>(entity =>
-        {
-            entity.ToTable("Color");
-        });
-
-        modelBuilder.Entity<Favorite>(entity =>
-        {
-            entity.ToTable("Favorite");
-
-            entity.HasIndex(e => e.ProductVariantId, "IX_Favorite_ProductVariantId");
-
-            entity.HasIndex(e => new { e.UserId, e.ProductVariantId }, "IX_Favorite_UserId_ProductVariantId")
-                .IsUnique()
-                .HasFilter("([UserId] IS NOT NULL)");
-
-            entity.HasOne(d => d.ProductVariant).WithMany(p => p.Favorites).HasForeignKey(d => d.ProductVariantId);
-
-            entity.HasOne(d => d.User).WithMany(p => p.Favorites)
-                .HasForeignKey(d => d.UserId)
+            // One-to-many relationship with CartItem
+            entity.HasMany(c => c.CartItems)
+                .WithOne(ci => ci.Cart)
+                .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<MainCategory>(entity =>
+        // CartItem
+        modelBuilder.Entity<CartItem>(entity =>
         {
-            entity.ToTable("MainCategory");
+            entity.ToTable("CartItem").HasKey(ci => ci.Id);
         });
 
+        // Order
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.ToTable("Order").HasKey(o => o.Id);
+
+            entity.Property(o => o.Total)
+                .HasColumnType("decimal(18,2)");
+
+            // One-to-many relationship with OrderItem
+            entity.HasMany(o => o.OrderItems)
+                .WithOne(oi => oi.Order)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // OrderItem
         modelBuilder.Entity<OrderItem>(entity =>
         {
-            entity.ToTable("OrderItem");
+            entity.ToTable("OrderItem").HasKey(oi => oi.Id);
 
-            entity.HasIndex(e => e.OrderId, "IX_OrderItem_OrderId");
-
-            entity.HasIndex(e => e.ProductVariantId, "IX_OrderItem_ProductVariantId");
-
-            entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
-
-            entity.HasOne(d => d.Order).WithMany(p => p.OrderItems).HasForeignKey(d => d.OrderId);
-
-            entity.HasOne(d => d.ProductVariant).WithMany(p => p.OrderItems).HasForeignKey(d => d.ProductVariantId);
+            entity.Property(oi => oi.UnitPrice)
+                .HasColumnType("decimal(18,2)");
         });
+        #endregion
 
+        // Product
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.ToTable("Product");
+            entity.ToTable("Product").HasKey(p => p.Id);
 
-            entity.HasIndex(e => e.SubCategoryId, "IX_Product_SubCategoryId");
+            // One-to-many relationship with ProductPrice
+            entity.HasMany(p => p.ProductPrices)
+                .WithOne(pp => pp.Product)
+                .HasForeignKey(pp => pp.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
+            // One-to-many relationship with ProductVariant
+            entity.HasMany(p => p.ProductVariants)
+                .WithOne(pv => pv.Product)
+                .HasForeignKey(p => p.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
-            entity.HasOne(d => d.SubCategory).WithMany(p => p.Products)
-                .HasForeignKey(d => d.SubCategoryId)
+        // ProductPrice
+        modelBuilder.Entity<ProductPrice>(entity =>
+        {
+            entity.ToTable("ProductPrice").HasKey(pp => pp.Id);
+
+            entity.Property(pp => pp.Amount)
+                .HasColumnType("decimal(18,2)");
+
+            // Add a unique constraint on (ProductId, Currency)
+            // Ensures a product can only have one price per currency
+            entity.HasIndex(pp => new { pp.ProductId, pp.Currency })
+                .IsUnique()
+                .HasDatabaseName("UX_ProductPrice_ProductId_Currency");
+        });
+
+        // ProductVariant
+        modelBuilder.Entity<ProductVariant>(entity =>
+        {
+            entity.ToTable("ProductVariant").HasKey(pv => pv.Id);
+
+            // One-to-many relationship with CartItem
+            entity.HasMany(pv => pv.CartItems)
+                .WithOne(ci => ci.ProductVariant)
+                .HasForeignKey(ci => ci.ProductVariantId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // One-to-many relationship with OrderItem
+            entity.HasMany(pv => pv.OrderItems)
+                .WithOne(oi => oi.ProductVariant)
+                .HasForeignKey(oi => oi.ProductVariantId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        modelBuilder.Entity<ProductVariant>(entity =>
+        // Color
+        modelBuilder.Entity<Color>(entity =>
         {
-            entity.ToTable("ProductVariant");
+            entity.ToTable("Color").HasKey(c => c.Id);
 
-            entity.HasIndex(e => e.ColorId, "IX_ProductVariant_ColorId");
-
-            entity.HasIndex(e => e.ProductId, "IX_ProductVariant_ProductId");
-
-            entity.HasIndex(e => e.SizeId, "IX_ProductVariant_SizeId");
-
-            entity.HasOne(d => d.Color).WithMany(p => p.ProductVariants).HasForeignKey(d => d.ColorId);
-
-            entity.HasOne(d => d.Product).WithMany(p => p.ProductVariants).HasForeignKey(d => d.ProductId);
-
-            entity.HasOne(d => d.Size).WithMany(p => p.ProductVariants).HasForeignKey(d => d.SizeId);
+            // One-to-many relationship with ProductVariant
+            entity.HasMany(c => c.ProductVariants)
+                .WithOne(pv => pv.Color)
+                .HasForeignKey(pv => pv.ColorId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
-
-        modelBuilder.Entity<Size>(entity =>
-        {
-            entity.ToTable("Size");
-        });
-
-        modelBuilder.Entity<SubCategory>(entity =>
-        {
-            entity.ToTable("SubCategory");
-
-            entity.HasIndex(e => e.MainCategoryId, "IX_SubCategory_MainCategoryId");
-
-            entity.HasOne(d => d.MainCategory).WithMany(p => p.SubCategories)
-                .HasForeignKey(d => d.MainCategoryId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        OnModelCreatingPartial(modelBuilder);
     }
-
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

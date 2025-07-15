@@ -31,9 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\malefashion_warehouse.client\malefashion_warehouse.client.esproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

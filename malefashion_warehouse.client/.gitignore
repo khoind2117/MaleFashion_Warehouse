@@ -46,3 +46,7 @@ Thumbs.db
 
 # VS Debug folder
 obj/
+
+# Ignore Visual Studio JavaScript SDK project files
+*.esproj
+*.esproj.user

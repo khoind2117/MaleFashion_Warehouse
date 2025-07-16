@@ -6,9 +6,9 @@ public class ProductVariant
 {
     public int Id { get; set; }
 
-    public Size Size { get; set; }
-
     public int Stock { get; set; }
+
+    public Size Size { get; set; }
 
     public int? ColorId { get; set; }
     public virtual Color? Color { get; set; }

@@ -26,8 +26,6 @@ public class ApplicationDbContext : IdentityDbContext<User>
 
     public DbSet<Product> Products { get; set; }
 
-    public DbSet<ProductPrice> ProductPrices { get; set; }
-
     public DbSet<ProductVariant> ProductVariants { get; set; }
 
     public DbSet<Color> Colors { get; set; }
@@ -111,32 +109,17 @@ public class ApplicationDbContext : IdentityDbContext<User>
         {
             entity.ToTable("Product").HasKey(p => p.Id);
 
-            // One-to-many relationship with ProductPrice
-            entity.HasMany(p => p.ProductPrices)
-                .WithOne(pp => pp.Product)
-                .HasForeignKey(pp => pp.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(p => p.PriceVnd)
+                .HasColumnType("decimal(18,2)");
+
+            entity.Property(p => p.PriceUsd)
+                .HasColumnType("decimal(18,2)");
 
             // One-to-many relationship with ProductVariant
             entity.HasMany(p => p.ProductVariants)
                 .WithOne(pv => pv.Product)
                 .HasForeignKey(p => p.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // ProductPrice
-        modelBuilder.Entity<ProductPrice>(entity =>
-        {
-            entity.ToTable("ProductPrice").HasKey(pp => pp.Id);
-
-            entity.Property(pp => pp.Amount)
-                .HasColumnType("decimal(18,2)");
-
-            // Add a unique constraint on (ProductId, Currency)
-            // Ensures a product can only have one price per currency
-            entity.HasIndex(pp => new { pp.ProductId, pp.Currency })
-                .IsUnique()
-                .HasDatabaseName("UX_ProductPrice_ProductId_Currency");
         });
 
         // ProductVariant

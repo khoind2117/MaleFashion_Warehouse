@@ -1,5 +1,8 @@
-﻿namespace MaleFashion_Warehouse.Server.Common.Enums
+﻿using System.Text.Json.Serialization;
+
+namespace MaleFashion_Warehouse.Server.Common.Enums
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum Size
     {
         S = 1,

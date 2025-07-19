@@ -19,7 +19,6 @@ namespace MaleFashion_Warehouse.Server.Repositories.Implementations
             _dbSet = context.Set<TEntity>();
         }
 
-        #region CRUD
         public async Task<TEntity?> CreateAsync(TEntity entity)
         {
             var entry = await _dbSet.AddAsync(entity);
@@ -64,7 +63,31 @@ namespace MaleFashion_Warehouse.Server.Repositories.Implementations
             _dbSet.RemoveRange(entities);
             return await _context.SaveChangesAsync() > 0;
         }
-        #endregion
+
+        public async Task<bool> ChangeStatusAsync<TStatus>(object id, TStatus status)
+            where TStatus : struct, Enum
+        {
+            if (!Enum.IsDefined(typeof(TStatus), status))
+            {
+                return false;
+            }
+
+            var entity = await _dbSet.FindAsync(id);
+            if (entity == null)
+            {
+                return false;
+            }
+
+            var statusProp = entity.GetType().GetProperty("Status");
+            if (statusProp == null || !statusProp.CanWrite)
+                return false;
+
+            statusProp.SetValue(entity, status);
+            _context.Entry(entity).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
 
         public async Task<TEntity?> GetByIdAsync(
             object id,
@@ -80,6 +103,26 @@ namespace MaleFashion_Warehouse.Server.Repositories.Implementations
             }
 
             return await query.FirstOrDefaultAsync(e => EF.Property<object>(e, "Id").Equals(id));
+        }
+
+        public async Task<List<TEntity>> GetAllNotPagedAsync(
+            Expression<Func<TEntity, bool>>? filter = null,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null)
+        {
+            IQueryable<TEntity> query = _dbSet;
+
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            return await query.ToListAsync();
         }
 
         public async Task<PageableResponse<TEntity>> GetPagedAsync<TFilter>(

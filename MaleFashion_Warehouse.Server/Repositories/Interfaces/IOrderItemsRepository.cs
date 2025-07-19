@@ -2,8 +2,7 @@
 
 namespace MaleFashion_Warehouse.Server.Repositories.Interfaces
 {
-    public interface IProductsRepository : IGenericRepository<Product>
+    public interface IOrderItemsRepository : IGenericRepository<OrderItem>
     {
-
     }
 }

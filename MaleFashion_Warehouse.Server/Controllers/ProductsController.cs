@@ -1,7 +1,7 @@
 ﻿using MaleFashion_Warehouse.Server.Common.Dtos;
+using MaleFashion_Warehouse.Server.Common.Enums;
 using MaleFashion_Warehouse.Server.Models.Dtos.Product;
 using MaleFashion_Warehouse.Server.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MaleFashion_Warehouse.Server.Controllers
@@ -10,11 +10,11 @@ namespace MaleFashion_Warehouse.Server.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly IProductsService _productService;
+        private readonly IProductsService _productsService;
 
-        public ProductsController(IProductsService productService)
+        public ProductsController(IProductsService productsService)
         {
-            _productService = productService;
+            _productsService = productsService;
         }
 
         //[HttpGet("get-all")]
@@ -22,7 +22,7 @@ namespace MaleFashion_Warehouse.Server.Controllers
         //{
         //    try
         //    {
-        //        var products = await _productService.GetAllAsync();
+        //        var products = await _productsService.GetAllAsync();
         //        return Ok(products);
         //    }
         //    catch (Exception ex)
@@ -46,7 +46,7 @@ namespace MaleFashion_Warehouse.Server.Controllers
                     });
                 }
 
-                var responseApi = await _productService.AddAsync(productRequestDto);
+                var responseApi = await _productsService.CreateAsync(productRequestDto);
 
                 if (!responseApi.Success)
                 {
@@ -83,7 +83,7 @@ namespace MaleFashion_Warehouse.Server.Controllers
                     });
                 }
 
-                var responseApi = await _productService.UpdateAsync(id, productRequestDto);
+                var responseApi = await _productsService.UpdateAsync(id, productRequestDto);
 
                 if (!responseApi.Success)
                 {
@@ -110,7 +110,34 @@ namespace MaleFashion_Warehouse.Server.Controllers
         {
             try
             {
-                var responseApi = await _productService.DeleteAsync(id);
+                var responseApi = await _productsService.DeleteAsync(id);
+
+                if (!responseApi.Success)
+                {
+                    return StatusCode(responseApi.Status, responseApi);
+                }
+
+                return Ok(responseApi);
+            }
+            catch (Exception ex)
+            {
+                var errorResponse = new ResponseApi<object>
+                {
+                    Status = 500,
+                    Success = false,
+                    Message = ex.Message,
+                };
+                return StatusCode(500, errorResponse);
+            }
+        }
+
+        [HttpPatch]
+        [Route("{id}/status")]
+        public async Task<IActionResult> ChangeStatus(int id, [FromBody] ProductStatus status)
+        {
+            try
+            {
+                var responseApi = await _productsService.ChangeStatusAsync(id, status);
 
                 if (!responseApi.Success)
                 {
@@ -137,7 +164,7 @@ namespace MaleFashion_Warehouse.Server.Controllers
         {
             try
             {
-                var responseApi = await _productService.GetByIdAsync(id);
+                var responseApi = await _productsService.GetByIdAsync(id);
 
                 if (!responseApi.Success)
                 {
@@ -164,7 +191,17 @@ namespace MaleFashion_Warehouse.Server.Controllers
         {
             try
             {
-                var responseApi = await _productService.GetPaged(pagableRequest);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new ResponseApi<object>
+                    {
+                        Status = 400,
+                        Success = false,
+                        Message = "Invalid request data.",
+                    });
+                }
+
+                var responseApi = await _productsService.GetPaged(pagableRequest);
 
                 if (!responseApi.Success)
                 {

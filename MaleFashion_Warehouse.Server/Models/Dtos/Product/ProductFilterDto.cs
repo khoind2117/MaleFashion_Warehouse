@@ -1,4 +1,5 @@
 ﻿using MaleFashion_Warehouse.Server.Common.Dtos;
+using MaleFashion_Warehouse.Server.Common.Enums;
 
 namespace MaleFashion_Warehouse.Server.Models.Dtos.Product
 {
@@ -7,7 +8,7 @@ namespace MaleFashion_Warehouse.Server.Models.Dtos.Product
 
         public string? Name { get; set; }
         public decimal? Price { get; set; }
-        public string? SubCategoryName { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public List<Category>? Category { get; set; }
+        public DateTimeOffset UpdatedDate { get; set; }
     }
 }

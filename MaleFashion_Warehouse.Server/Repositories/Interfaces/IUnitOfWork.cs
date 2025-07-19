@@ -3,8 +3,11 @@
     public interface IUnitOfWork
     {
         IAuthRepository AuthRepository { get; }
-        IProductsRepository ProductRepository { get; }
+        IProductsRepository ProductsRepository { get; }
         IProductVariantsRepository ProductVariantsRepository { get; }
+        IOrdersRepository OrdersRepository { get; }
+        IOrderItemsRepository OrderItemsRepository { get; }
+        ICartItemsRepository CartItemsRepository { get; }
 
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();

@@ -2,7 +2,6 @@
 using MaleFashion_Warehouse.Server.Models.Dtos.User;
 using MaleFashion_Warehouse.Server.Models.Entities;
 using MaleFashion_Warehouse.Server.Services.Interfaces;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 

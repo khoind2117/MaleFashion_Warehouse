@@ -4,9 +4,10 @@ using MaleFashion_Warehouse.Server.Repositories.Interfaces;
 
 namespace MaleFashion_Warehouse.Server.Repositories.Implementations
 {
-    public class ProductsRepository : GenericRepository<ApplicationDbContext, Product>, IProductsRepository
+    public class CartItemsRepository : GenericRepository<ApplicationDbContext, CartItem>, ICartItemsRepository
     {
-        public ProductsRepository(ApplicationDbContext context) : base(context) { }
-
+        public CartItemsRepository(ApplicationDbContext context) : base(context)
+        {
+        }
     }
 }

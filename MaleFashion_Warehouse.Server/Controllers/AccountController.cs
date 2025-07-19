@@ -41,12 +41,13 @@ namespace MaleFashion_Warehouse.Server.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ResponseApi<object>
+                var errorResponse = new ResponseApi<object>
                 {
                     Status = 500,
                     Success = false,
-                    Message = "An error occurred",
-                });
+                    Message = ex.Message,
+                };
+                return StatusCode(500, errorResponse);
             }
         }
     }

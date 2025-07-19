@@ -38,7 +38,7 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256Signature);
-            var expiresIn = DateTime.UtcNow.AddMinutes(30);
+            var expiresIn = DateTime.UtcNow.AddDays(1);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

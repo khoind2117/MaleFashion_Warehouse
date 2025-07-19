@@ -1,19 +1,13 @@
-﻿using Azure.Core;
-using MaleFashion_Warehouse.Server.Common.Dtos;
+﻿using MaleFashion_Warehouse.Server.Common.Dtos;
+using MaleFashion_Warehouse.Server.Common.Enums;
 using MaleFashion_Warehouse.Server.Models.Dtos.Color;
 using MaleFashion_Warehouse.Server.Models.Dtos.Product;
 using MaleFashion_Warehouse.Server.Models.Dtos.ProductVariant;
-using MaleFashion_Warehouse.Server.Models.Dtos.Size;
-using MaleFashion_Warehouse.Server.Models.Dtos.SubCategory;
 using MaleFashion_Warehouse.Server.Models.Entities;
-using MaleFashion_Warehouse.Server.Repositories.Implementations;
 using MaleFashion_Warehouse.Server.Repositories.Interfaces;
 using MaleFashion_Warehouse.Server.Services.Interfaces;
 using MaleFashion_Warehouse.Server.Utils;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using System.Linq.Expressions;
 
 namespace MaleFashion_Warehouse.Server.Services.Implementations
 {
@@ -29,28 +23,28 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
             _slugUtil = slugUtil;
         }
 
-        #region CRUD
-        public async Task<ResponseApi<ProductDetailDto>> AddAsync(ProductRequestDto productRequestDto)
+        public async Task<ResponseApi<ProductDetailDto>> CreateAsync(ProductRequestDto productRequestDto)
         {
             var product = new Product
             {
                 Name = productRequestDto.Name,
                 Slug = _slugUtil.GenerateSlug(productRequestDto.Name),
+                Category = productRequestDto.Category,
+                PriceVnd = productRequestDto.PriceVnd,
+                PriceUsd = productRequestDto.PriceUsd,
                 Description = productRequestDto.Description,
-                Price = productRequestDto.Price,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-                IsActive = true,
-                SubCategoryId = productRequestDto.SubCategoryId,
+                CreatedDate = DateTimeOffset.UtcNow,
+                UpdatedDate = DateTimeOffset.UtcNow,
+                Status = productRequestDto.Status,
                 ProductVariants = productRequestDto.ProductVariants.Select(pv => new ProductVariant
                 {
                     Stock = pv.Stock,
+                    Size = pv.Size,
                     ColorId = pv.ColorId,
-                    SizeId = pv.SizeId
                 }).ToList()
             };
 
-            await _unitOfWork.ProductRepository.CreateAsync(product);
+            await _unitOfWork.ProductsRepository.CreateAsync(product);
             await _unitOfWork.SaveChangesAsync();
 
             return await GetByIdAsync(product.Id);
@@ -58,7 +52,7 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
 
         public async Task<ResponseApi<object>> UpdateAsync(int id, ProductRequestDto productRequestDto)
         {
-            var product = await _unitOfWork.ProductRepository.GetByIdAsync(id);
+            var product = await _unitOfWork.ProductsRepository.GetByIdAsync(id);
             if (product == null)
             {
                 return new ResponseApi<object>
@@ -71,10 +65,12 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
 
             product.Name = productRequestDto.Name;
             product.Slug = _slugUtil.GenerateSlug(productRequestDto.Name);
+            product.Category = productRequestDto.Category;
+            product.PriceVnd = productRequestDto.PriceVnd;
+            product.PriceUsd = productRequestDto.PriceUsd;
             product.Description = productRequestDto.Description;
-            product.Price = productRequestDto.Price;
-            product.UpdatedAt = DateTime.Now;
-            product.SubCategoryId = productRequestDto.SubCategoryId;
+            product.Status = productRequestDto.Status;
+            product.UpdatedDate = DateTimeOffset.UtcNow;
 
             var existingVariants = product.ProductVariants.ToDictionary(pv => pv.Id);
 
@@ -86,14 +82,14 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                     {
                         Stock = pvDto.Stock,
                         ColorId = pvDto.ColorId,
-                        SizeId = pvDto.SizeId,
+                        Size = pvDto.Size
                     });
                 }
-                else if (existingVariants.TryGetValue(pvDto.Id.Value, out var existingVariant)) 
+                else if (existingVariants.TryGetValue(pvDto.Id.Value, out var existingVariant))
                 {
                     existingVariant.Stock = pvDto.Stock;
                     existingVariant.ColorId = pvDto.ColorId;
-                    existingVariant.SizeId = pvDto.SizeId;
+                    existingVariant.Size = pvDto.Size;
 
                     existingVariants.Remove(pvDto.Id.Value);
                 }
@@ -104,7 +100,7 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                 await _unitOfWork.ProductVariantsRepository.DeleteAsync(toRemove.Id);
             }
 
-            await _unitOfWork.ProductRepository.UpdateAsync(product);
+            await _unitOfWork.ProductsRepository.UpdateAsync(product);
             await _unitOfWork.SaveChangesAsync();
 
             return new ResponseApi<object>
@@ -117,7 +113,7 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
 
         public async Task<ResponseApi<object>> DeleteAsync(int id)
         {
-            var product = await _unitOfWork.ProductRepository.GetByIdAsync(id);
+            var product = await _unitOfWork.ProductsRepository.GetByIdAsync(id);
             if (product == null)
             {
                 return new ResponseApi<object>
@@ -128,7 +124,7 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                 };
             }
 
-            await _unitOfWork.ProductRepository.DeleteAsync(id);
+            await _unitOfWork.ProductsRepository.DeleteAsync(id);
             await _unitOfWork.SaveChangesAsync();
 
             return new ResponseApi<object>
@@ -138,17 +134,36 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                 Message = "Deleted successfully",
             };
         }
-        #endregion
+
+        public async Task<ResponseApi<object>> ChangeStatusAsync(int id, ProductStatus status)
+        {
+            var isSuccess = await _unitOfWork.ProductsRepository.ChangeStatusAsync(id, status);
+            
+            if (!isSuccess)
+            {
+                return new ResponseApi<object>
+                {
+                    Status = 400,
+                    Success = false,
+                    Message = "Failed to change status",
+                };
+            }
+
+            return new ResponseApi<object>
+            {
+                Status = 200,
+                Success = true,
+                Message = "Status updated successfully",
+            };
+        }
+
 
         public async Task<ResponseApi<ProductDetailDto>> GetByIdAsync(int id)
         {
-            var product = await _unitOfWork.ProductRepository.GetByIdAsync(
+            var product = await _unitOfWork.ProductsRepository.GetByIdAsync(
                 id: id,
-                include: p => p.Include(p => p.SubCategory)
-                                .Include(p => p.ProductVariants)
+                include: p => p.Include(p => p.ProductVariants)
                                     .ThenInclude(pv => pv.Color)
-                                .Include(p => p.ProductVariants)
-                                    .ThenInclude(pv => pv.Size)
             );
 
             if (product == null)
@@ -166,33 +181,25 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                 Id = product.Id,
                 Name = product.Name,
                 Slug = product.Slug,
+                Category = product.Category,
+                PriceVnd = product.PriceVnd,
+                PriceUsd = product.PriceUsd,
                 Description = product.Description,
-                Price = product.Price,
-                UpdatedAt = product.UpdatedAt,
-                IsActive = product.IsActive,
-                SubCategoryId = product.SubCategoryId,
-                SubCategory = product.SubCategory != null ? new SubCategoryDto
-                {
-                    Id = product.SubCategory.Id,
-                    Name = product.SubCategory.Name,
-                } : new SubCategoryDto(),
+                CreatedDate = product.CreatedDate,
+                UpdatedDate = product.UpdatedDate,
+                Status = product.Status,
                 ProductVariants = product.ProductVariants?.Select(pv => new ProductVariantDetailDto
                 {
                     Id = pv.Id,
                     Stock = pv.Stock,
+                    Size = pv.Size,
                     ColorId = pv.ColorId,
                     Color = pv.Color != null ? new ColorDto
                     {
                         Id = pv.Color.Id,
                         Name = pv.Color.Name,
-                        ColorCode = pv.Color.ColorCode,
+                        ColorHex = pv.Color.ColorHex,
                     } : new ColorDto(),
-                    SizeId = pv.SizeId,
-                    Size = pv.Size != null ? new SizeDto
-                    {
-                        Id = pv.Size.Id,
-                        Name = pv.Size.Name,
-                    } : new SizeDto(),
                 }).ToList()
             };
 
@@ -219,20 +226,20 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                 {
                     if (!string.IsNullOrWhiteSpace(criteria?.Name))
                         q = q.Where(p => p.Name.Contains(criteria.Name));
-                    if (criteria.Price.HasValue)
-                        q = q.Where(p => p.Price == criteria.Price);
-                    if (!string.IsNullOrWhiteSpace(criteria?.SubCategoryName))
-                        q = q.Where(p => p.Name.Contains(criteria.SubCategoryName));
-                    if (criteria.UpdatedAt != default)
-                        q = q.Where(p => p.UpdatedAt.Date == criteria.UpdatedAt.Date);
+                    if (criteria?.Category != null && criteria.Category.Any())
+                    {
+                        q = q.Where(p => criteria.Category.Contains(p.Category));
+                    }
+                    if (criteria.UpdatedDate != default)
+                        q = q.Where(p => p.UpdatedDate.Date == criteria.UpdatedDate.Date);
                     return q;
                 };
             }
 
-            var pagedData = await _unitOfWork.ProductRepository.GetPagedAsync(
+            var pagedData = await _unitOfWork.ProductsRepository.GetPagedAsync(
                 pagableRequest: pagableRequest,
                 filter: filter,
-                include: p => p.Include(p => p.SubCategory)
+                include: null
             );
 
             var dtoPaged = new PageableResponse<ProductListDto>
@@ -242,11 +249,12 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                     Id = p.Id,
                     Name = p.Name,
                     Slug = p.Slug,
+                    Category = p.Category,
+                    PriceVnd = p.PriceVnd,
+                    PriceUsd = p.PriceUsd,
                     Description = p.Description,
-                    Price = p.Price,
-                    UpdatedAt = p.UpdatedAt,
-                    IsActive = p.IsActive,
-                    SubCategoryName = p.SubCategory?.Name
+                    UpdatedDate = p.UpdatedDate,
+                    Status = p.Status,
                 }).ToList(),
                 TotalElements = pagedData.TotalElements,
                 TotalPages = pagedData.TotalPages,

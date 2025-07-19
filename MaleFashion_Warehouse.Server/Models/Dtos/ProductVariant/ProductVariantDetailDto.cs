@@ -1,17 +1,17 @@
-﻿using MaleFashion_Warehouse.Server.Models.Dtos.Color;
-using MaleFashion_Warehouse.Server.Models.Dtos.Size;
+﻿using MaleFashion_Warehouse.Server.Common.Enums;
+using MaleFashion_Warehouse.Server.Models.Dtos.Color;
 
 namespace MaleFashion_Warehouse.Server.Models.Dtos.ProductVariant
 {
     public class ProductVariantDetailDto
     {
         public int Id { get; set; }
-        public int Stock { get; set; }
         
-        public int? ColorId { get; set; }
-        public ColorDto? Color {  get; set; }
+        public int? Stock { get; set; }
+        
+        public Size Size { get; set; }
 
-        public int? SizeId { get; set; }
-        public SizeDto? Size { get; set; }
+        public int? ColorId { get; set; }
+        public virtual ColorDto? Color {  get; set; }
     }
 }

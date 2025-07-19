@@ -12,6 +12,7 @@ namespace MaleFashion_Warehouse.Server.Repositories.Implementations
         public IOrdersRepository OrdersRepository { get; }
         public IOrderItemsRepository OrderItemsRepository { get; }
         public ICartItemsRepository CartItemsRepository { get; }
+        public IColorsRepository ColorsRepository { get; }
 
         public UnitOfWork(
             ApplicationDbContext context,
@@ -21,6 +22,7 @@ namespace MaleFashion_Warehouse.Server.Repositories.Implementations
             IOrdersRepository ordersRepository,
             IOrderItemsRepository ordersItemsRepository,
             ICartItemsRepository cartItemsRepository,
+            IColorsRepository colorsRepository
             )
         {
             _context = context;
@@ -30,6 +32,7 @@ namespace MaleFashion_Warehouse.Server.Repositories.Implementations
             OrdersRepository = ordersRepository;
             OrderItemsRepository = ordersItemsRepository;
             CartItemsRepository = cartItemsRepository;
+            ColorsRepository = colorsRepository;
         }
 
         public async Task BeginTransactionAsync() => await _context.Database.BeginTransactionAsync();

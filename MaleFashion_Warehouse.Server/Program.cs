@@ -168,6 +168,8 @@ builder.Services.AddScoped<IProductVariantsRepository, ProductVariantRepository>
 builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
 builder.Services.AddScoped<IOrderItemsRepository, OrderItemsRepository>();
 builder.Services.AddScoped<ICartItemsRepository, CartItemsRepository>();
+builder.Services.AddScoped<IColorsRepository, ColorsRepository>();
+
 // Service
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -177,7 +179,7 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IProductsService, ProductsService>();
 builder.Services.AddScoped<IOrdersService, OrdersService>();
 builder.Services.AddScoped<ICartItemsService, CartItemsService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IColorsService, ColorsService>();
 #endregion
 
 #region Utilities

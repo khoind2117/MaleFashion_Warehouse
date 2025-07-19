@@ -8,6 +8,7 @@
         IOrdersRepository OrdersRepository { get; }
         IOrderItemsRepository OrderItemsRepository { get; }
         ICartItemsRepository CartItemsRepository { get; }
+        IColorsRepository ColorsRepository { get; }
 
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();

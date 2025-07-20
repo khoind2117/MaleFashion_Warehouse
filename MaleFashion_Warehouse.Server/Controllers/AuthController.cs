@@ -1,4 +1,5 @@
 ﻿using MaleFashion_Warehouse.Server.Common.Dtos;
+using MaleFashion_Warehouse.Server.Infrastructure.Authentication;
 using MaleFashion_Warehouse.Server.Models.Dtos.Auth;
 using MaleFashion_Warehouse.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;

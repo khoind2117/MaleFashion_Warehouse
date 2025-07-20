@@ -1,4 +1,6 @@
-﻿namespace MaleFashion_Warehouse.Server.Repositories.Interfaces
+﻿using MaleFashion_Warehouse.Server.Repositories.Interfaces;
+
+namespace MaleFashion_Warehouse.Server.Repositories.UnitOfWork
 {
     public interface IUnitOfWork
     {

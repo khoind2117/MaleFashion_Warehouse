@@ -1,7 +1,8 @@
 ﻿using MaleFashion_Warehouse.Server.Common.Dtos;
+using MaleFashion_Warehouse.Server.Infrastructure.Authentication;
 using MaleFashion_Warehouse.Server.Models.Dtos.Auth;
 using MaleFashion_Warehouse.Server.Models.Entities;
-using MaleFashion_Warehouse.Server.Repositories.Interfaces;
+using MaleFashion_Warehouse.Server.Repositories.UnitOfWork;
 using MaleFashion_Warehouse.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

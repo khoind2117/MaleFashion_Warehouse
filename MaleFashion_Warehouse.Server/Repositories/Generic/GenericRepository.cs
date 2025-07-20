@@ -1,10 +1,9 @@
 ﻿using MaleFashion_Warehouse.Server.Common.Dtos;
 using MaleFashion_Warehouse.Server.Common.Enums;
-using MaleFashion_Warehouse.Server.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace MaleFashion_Warehouse.Server.Repositories.Implementations
+namespace MaleFashion_Warehouse.Server.Repositories.Generic
 {
     public class GenericRepository<TDbContext, TEntity> : IGenericRepository<TEntity>
         where TDbContext : DbContext

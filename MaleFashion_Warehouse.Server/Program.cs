@@ -1,7 +1,10 @@
 ﻿using MaleFashion_Warehouse.Server.Data;
+using MaleFashion_Warehouse.Server.Infrastructure.Authentication;
+using MaleFashion_Warehouse.Server.Infrastructure.Caching;
 using MaleFashion_Warehouse.Server.Models.Entities;
 using MaleFashion_Warehouse.Server.Repositories.Implementations;
 using MaleFashion_Warehouse.Server.Repositories.Interfaces;
+using MaleFashion_Warehouse.Server.Repositories.UnitOfWork;
 using MaleFashion_Warehouse.Server.Services.Implementations;
 using MaleFashion_Warehouse.Server.Services.Interfaces;
 using MaleFashion_Warehouse.Server.Utils;
@@ -11,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -156,6 +160,13 @@ builder.Services.AddRouting(options =>
 {
     options.LowercaseUrls = true;
 });
+#endregion
+
+#region Redis Caching
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")));
+
+builder.Services.AddSingleton<ICacheService, CacheService>();
 #endregion
 
 #region Repository and Service Registrations

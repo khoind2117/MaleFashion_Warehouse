@@ -2,7 +2,7 @@
 using MaleFashion_Warehouse.Server.Models.Entities;
 using System.Security.Claims;
 
-namespace MaleFashion_Warehouse.Server.Services.Interfaces
+namespace MaleFashion_Warehouse.Server.Infrastructure.Authentication
 {
     public interface ITokenService
     {

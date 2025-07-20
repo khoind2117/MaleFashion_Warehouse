@@ -3,7 +3,7 @@ using MaleFashion_Warehouse.Server.Models.Dtos.CartItem;
 using MaleFashion_Warehouse.Server.Models.Dtos.Color;
 using MaleFashion_Warehouse.Server.Models.Dtos.ProductVariant;
 using MaleFashion_Warehouse.Server.Models.Entities;
-using MaleFashion_Warehouse.Server.Repositories.Interfaces;
+using MaleFashion_Warehouse.Server.Repositories.UnitOfWork;
 using MaleFashion_Warehouse.Server.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 

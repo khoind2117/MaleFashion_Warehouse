@@ -3,7 +3,7 @@ using MaleFashion_Warehouse.Server.Common.Enums;
 using MaleFashion_Warehouse.Server.Models.Dtos.Order;
 using MaleFashion_Warehouse.Server.Models.Dtos.OrderItem;
 using MaleFashion_Warehouse.Server.Models.Entities;
-using MaleFashion_Warehouse.Server.Repositories.Interfaces;
+using MaleFashion_Warehouse.Server.Repositories.UnitOfWork;
 using MaleFashion_Warehouse.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

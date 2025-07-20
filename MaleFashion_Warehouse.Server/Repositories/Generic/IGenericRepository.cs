@@ -1,7 +1,7 @@
 ﻿using MaleFashion_Warehouse.Server.Common.Dtos;
 using System.Linq.Expressions;
 
-namespace MaleFashion_Warehouse.Server.Repositories.Interfaces
+namespace MaleFashion_Warehouse.Server.Repositories.Generic
 {
     public interface IGenericRepository<TEntity>
         where TEntity : class
@@ -9,7 +9,7 @@ namespace MaleFashion_Warehouse.Server.Repositories.Interfaces
         Task<TEntity?> CreateAsync(TEntity entity);
         Task<bool> CreateManyAsync(IEnumerable<TEntity> entities);
         Task<bool> UpdateAsync(TEntity entity);
-        Task<bool> DeleteAsync(object id);  
+        Task<bool> DeleteAsync(object id);
         Task<bool> DeleteManyAsync(IEnumerable<object> ids);
         Task<bool> ChangeStatusAsync<TStatus>(object id, TStatus status)
             where TStatus : struct, Enum;

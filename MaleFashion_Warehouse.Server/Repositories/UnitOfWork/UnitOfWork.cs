@@ -1,7 +1,7 @@
 ﻿using MaleFashion_Warehouse.Server.Data;
 using MaleFashion_Warehouse.Server.Repositories.Interfaces;
 
-namespace MaleFashion_Warehouse.Server.Repositories.Implementations
+namespace MaleFashion_Warehouse.Server.Repositories.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {

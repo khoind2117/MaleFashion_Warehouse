@@ -1,6 +1,5 @@
 ﻿using MaleFashion_Warehouse.Server.Models.Dtos.Auth;
 using MaleFashion_Warehouse.Server.Models.Entities;
-using MaleFashion_Warehouse.Server.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +9,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace MaleFashion_Warehouse.Server.Services.Implementations
+namespace MaleFashion_Warehouse.Server.Infrastructure.Authentication
 {
     public class TokenService : ITokenService
     {

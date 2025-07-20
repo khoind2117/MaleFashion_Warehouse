@@ -1,10 +1,11 @@
 ﻿using MaleFashion_Warehouse.Server.Common.Dtos;
 using MaleFashion_Warehouse.Server.Common.Enums;
+using MaleFashion_Warehouse.Server.Infrastructure.Caching;
 using MaleFashion_Warehouse.Server.Models.Dtos.Color;
 using MaleFashion_Warehouse.Server.Models.Dtos.Product;
 using MaleFashion_Warehouse.Server.Models.Dtos.ProductVariant;
 using MaleFashion_Warehouse.Server.Models.Entities;
-using MaleFashion_Warehouse.Server.Repositories.Interfaces;
+using MaleFashion_Warehouse.Server.Repositories.UnitOfWork;
 using MaleFashion_Warehouse.Server.Services.Interfaces;
 using MaleFashion_Warehouse.Server.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -15,12 +16,16 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly SlugUtil _slugUtil;
+        private readonly ICacheService _cacheService;
 
         public ProductsService(IUnitOfWork unitOfWork,
-            SlugUtil slugUtil)
+            SlugUtil slugUtil,
+            ICacheService cacheService
+            )
         {
             _unitOfWork = unitOfWork;
             _slugUtil = slugUtil;
+            _cacheService = cacheService;
         }
 
         public async Task<ResponseApi<ProductDetailDto>> CreateAsync(ProductRequestDto productRequestDto)
@@ -160,6 +165,19 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
 
         public async Task<ResponseApi<ProductDetailDto>> GetByIdAsync(int id)
         {
+            var cacheKey = $"product:id:{id}";
+            
+            var cachedData =  await _cacheService.GetAsync<ProductDetailDto>(cacheKey);
+            if (cachedData != null)
+            {
+                return new ResponseApi<ProductDetailDto>
+                {
+                    Status = 200,
+                    Success = true,
+                    Data = cachedData
+                };
+            }
+
             var product = await _unitOfWork.ProductsRepository.GetByIdAsync(
                 id: id,
                 include: p => p.Include(p => p.ProductVariants)
@@ -202,6 +220,8 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                     } : new ColorDto(),
                 }).ToList()
             };
+
+            await _cacheService.SetAsync(cacheKey, productDetailDto, TimeSpan.FromMinutes(15));
 
             return new ResponseApi<ProductDetailDto>
             {

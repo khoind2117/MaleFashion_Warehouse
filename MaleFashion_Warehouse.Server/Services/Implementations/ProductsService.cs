@@ -175,29 +175,56 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
             };
         }
 
-
         public async Task<ResponseApi<ProductDetailDto>> GetByIdAsync(int id)
         {
             var cacheKey = $"product:id:{id}";
-            
-            var cachedData =  await _cacheService.GetAsync<ProductDetailDto>(cacheKey);
-            if (cachedData != null)
-            {
-                return new ResponseApi<ProductDetailDto>
-                {
-                    Status = 200,
-                    Success = true,
-                    Data = cachedData
-                };
-            }
 
-            var product = await _unitOfWork.ProductsRepository.GetByIdAsync(
-                id: id,
-                include: p => p.Include(p => p.ProductVariants)
-                                    .ThenInclude(pv => pv.Color)
+            ProductDetailDto? productDetailDto = await _cacheService.GetOrSetAsync(
+                cacheKey,
+                async () =>
+                {
+                    var product = await _unitOfWork.ProductsRepository.GetByIdAsync(
+                        id: id,
+                        include: p => p.Include(p => p.ProductVariants)
+                                       .ThenInclude(pv => pv.Color)
+                    );
+
+                    if (product == null)
+                    {
+                        return null;
+                    }
+
+                    return new ProductDetailDto
+                    {
+                        Id = product.Id,
+                        Name = product.Name,
+                        Slug = product.Slug,
+                        Category = product.Category,
+                        PriceVnd = product.PriceVnd,
+                        PriceUsd = product.PriceUsd,
+                        Description = product.Description,
+                        CreatedDate = product.CreatedDate,
+                        UpdatedDate = product.UpdatedDate,
+                        Status = product.Status,
+                        ProductVariants = product.ProductVariants?.Select(pv => new ProductVariantDetailDto
+                        {
+                            Id = pv.Id,
+                            Stock = pv.Stock,
+                            Size = pv.Size,
+                            ColorId = pv.ColorId,
+                            Color = pv.Color != null ? new ColorDto
+                            {
+                                Id = pv.Color.Id,
+                                Name = pv.Color.Name,
+                                ColorHex = pv.Color.ColorHex,
+                            } : new ColorDto(),
+                        }).ToList()
+                    };
+                },
+                expiry: TimeSpan.FromMinutes(15)
             );
 
-            if (product == null)
+            if (productDetailDto == null)
             {
                 return new ResponseApi<ProductDetailDto>
                 {
@@ -206,35 +233,6 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                     Message = "Product not found",
                 };
             }
-
-            var productDetailDto = new ProductDetailDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Slug = product.Slug,
-                Category = product.Category,
-                PriceVnd = product.PriceVnd,
-                PriceUsd = product.PriceUsd,
-                Description = product.Description,
-                CreatedDate = product.CreatedDate,
-                UpdatedDate = product.UpdatedDate,
-                Status = product.Status,
-                ProductVariants = product.ProductVariants?.Select(pv => new ProductVariantDetailDto
-                {
-                    Id = pv.Id,
-                    Stock = pv.Stock,
-                    Size = pv.Size,
-                    ColorId = pv.ColorId,
-                    Color = pv.Color != null ? new ColorDto
-                    {
-                        Id = pv.Color.Id,
-                        Name = pv.Color.Name,
-                        ColorHex = pv.Color.ColorHex,
-                    } : new ColorDto(),
-                }).ToList()
-            };
-
-            await _cacheService.SetAsync(cacheKey, productDetailDto, TimeSpan.FromMinutes(15));
 
             return new ResponseApi<ProductDetailDto>
             {
@@ -256,73 +254,117 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
             bool canCache = criteria?.GetType().GetProperties().Length > 0
                             && page == 0
                             && sortField == "updatedDate"
-                            && sortDirection == SortEnum.DESC; 
+                            && sortDirection == SortEnum.DESC;
+
+            PageableResponse<ProductListDto>? dtoPaged;
             if (canCache)
             {
-                var cachedData = await _cacheService.GetAsync<PageableResponse<ProductListDto>>(cacheKey);
-                if (cachedData != null)
-                {
-                    return new ResponseApi<PageableResponse<ProductListDto>>
+                dtoPaged = await _cacheService.GetOrSetAsync(
+                    key: cacheKey,
+                    factory: async () =>
                     {
-                        Status = 200,
-                        Success = true,
-                        Data = cachedData
+                        Func<ProductFilterDto?, IQueryable<Product>, IQueryable<Product>>? filter = null;
+                        if (criteria != null)
+                        {
+                            filter = (criteria, q) =>
+                            {
+                                if (!string.IsNullOrWhiteSpace(criteria?.Name))
+                                    q = q.Where(p => p.Name.Contains(criteria.Name));
+                                if (criteria?.Category != null && criteria.Category.Any())
+                                {
+                                    q = q.Where(p => criteria.Category.Contains(p.Category));
+                                }
+                                if (criteria.UpdatedDate != default)
+                                    q = q.Where(p => p.UpdatedDate.Date == criteria.UpdatedDate.Date);
+                                return q;
+                            };
+                        }
+
+                        var pagedData = await _unitOfWork.ProductsRepository.GetPagedAsync(
+                            pagableRequest: pagableRequest,
+                            filter: filter,
+                            include: null
+                        );
+
+                        return dtoPaged = new PageableResponse<ProductListDto>
+                        {
+                            Content = pagedData.Content?.Select(p => new ProductListDto
+                            {
+                                Id = p.Id,
+                                Name = p.Name,
+                                Slug = p.Slug,
+                                Category = p.Category,
+                                PriceVnd = p.PriceVnd,
+                                PriceUsd = p.PriceUsd,
+                                Description = p.Description,
+                                UpdatedDate = p.UpdatedDate,
+                                Status = p.Status,
+                            }).ToList(),
+                            TotalElements = pagedData.TotalElements,
+                            TotalPages = pagedData.TotalPages,
+                            Number = pagedData.Number,
+                            Size = pagedData.Size,
+                            NumberOfElements = pagedData.NumberOfElements,
+                            First = pagedData.First,
+                            Last = pagedData.Last,
+                            Empty = pagedData.Empty,
+                            Sort = pagedData.Sort,
+                            Pageable = pagedData.Pageable
+                        };
+                    },
+                    expiry: TimeSpan.FromMinutes(15)
+                );
+            }
+            else
+            {
+                Func<ProductFilterDto?, IQueryable<Product>, IQueryable<Product>>? filter = null;
+                if (criteria != null)
+                {
+                    filter = (criteria, q) =>
+                    {
+                        if (!string.IsNullOrWhiteSpace(criteria?.Name))
+                            q = q.Where(p => p.Name.Contains(criteria.Name));
+                        if (criteria?.Category != null && criteria.Category.Any())
+                        {
+                            q = q.Where(p => criteria.Category.Contains(p.Category));
+                        }
+                        if (criteria.UpdatedDate != default)
+                            q = q.Where(p => p.UpdatedDate.Date == criteria.UpdatedDate.Date);
+                        return q;
                     };
                 }
-            }
 
-            Func<ProductFilterDto?, IQueryable<Product>, IQueryable<Product>>? filter = null;
-            if (criteria != null)
-            {
-                filter = (criteria, q) =>
+                var pagedData = await _unitOfWork.ProductsRepository.GetPagedAsync(
+                    pagableRequest: pagableRequest,
+                    filter: filter,
+                    include: null
+                );
+
+                dtoPaged = new PageableResponse<ProductListDto>
                 {
-                    if (!string.IsNullOrWhiteSpace(criteria?.Name))
-                        q = q.Where(p => p.Name.Contains(criteria.Name));
-                    if (criteria?.Category != null && criteria.Category.Any())
+                    Content = pagedData.Content?.Select(p => new ProductListDto
                     {
-                        q = q.Where(p => criteria.Category.Contains(p.Category));
-                    }
-                    if (criteria.UpdatedDate != default)
-                        q = q.Where(p => p.UpdatedDate.Date == criteria.UpdatedDate.Date);
-                    return q;
+                        Id = p.Id,
+                        Name = p.Name,
+                        Slug = p.Slug,
+                        Category = p.Category,
+                        PriceVnd = p.PriceVnd,
+                        PriceUsd = p.PriceUsd,
+                        Description = p.Description,
+                        UpdatedDate = p.UpdatedDate,
+                        Status = p.Status,
+                    }).ToList(),
+                    TotalElements = pagedData.TotalElements,
+                    TotalPages = pagedData.TotalPages,
+                    Number = pagedData.Number,
+                    Size = pagedData.Size,
+                    NumberOfElements = pagedData.NumberOfElements,
+                    First = pagedData.First,
+                    Last = pagedData.Last,
+                    Empty = pagedData.Empty,
+                    Sort = pagedData.Sort,
+                    Pageable = pagedData.Pageable
                 };
-            }
-
-            var pagedData = await _unitOfWork.ProductsRepository.GetPagedAsync(
-                pagableRequest: pagableRequest,
-                filter: filter,
-                include: null
-            );
-
-            var dtoPaged = new PageableResponse<ProductListDto>
-            {
-                Content = pagedData.Content?.Select(p => new ProductListDto
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Slug = p.Slug,
-                    Category = p.Category,
-                    PriceVnd = p.PriceVnd,
-                    PriceUsd = p.PriceUsd,
-                    Description = p.Description,
-                    UpdatedDate = p.UpdatedDate,
-                    Status = p.Status,
-                }).ToList(),
-                TotalElements = pagedData.TotalElements,
-                TotalPages = pagedData.TotalPages,
-                Number = pagedData.Number,
-                Size = pagedData.Size,
-                NumberOfElements = pagedData.NumberOfElements,
-                First = pagedData.First,
-                Last = pagedData.Last,
-                Empty = pagedData.Empty,
-                Sort = pagedData.Sort,
-                Pageable = pagedData.Pageable
-            };
-
-            if (canCache)
-            {
-                await _cacheService.SetAsync(cacheKey, dtoPaged, TimeSpan.FromMinutes(15));
             }
 
             return new ResponseApi<PageableResponse<ProductListDto>>

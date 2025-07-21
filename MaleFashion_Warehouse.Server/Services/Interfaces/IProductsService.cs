@@ -6,7 +6,6 @@ namespace MaleFashion_Warehouse.Server.Services.Interfaces
 {
     public interface IProductsService
     {
-        //Task<IEnumerable<ProductDto>> GetAllAsync();
         Task<ResponseApi<ProductDetailDto>> CreateAsync(ProductRequestDto productRequestDto);
         Task<ResponseApi<object>> UpdateAsync(int id, ProductRequestDto productRequestDto);
         Task<ResponseApi<object>> DeleteAsync(int id);

@@ -17,20 +17,6 @@ namespace MaleFashion_Warehouse.Server.Controllers
             _productsService = productsService;
         }
 
-        //[HttpGet("get-all")]
-        //public async Task<IActionResult> GetAll()
-        //{
-        //    try
-        //    {
-        //        var products = await _productsService.GetAllAsync();
-        //        return Ok(products);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new { message = "", error = ex.Message });
-        //    }
-        //}
-
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] ProductRequestDto productRequestDto)
         {

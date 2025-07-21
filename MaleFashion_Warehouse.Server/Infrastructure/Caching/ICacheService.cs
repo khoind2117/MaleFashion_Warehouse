@@ -11,5 +11,8 @@
         Task RemoveAsync(string key);
 
         Task RemoveByPrefixAsync(string prefix);
+
+        Task<T?> GetOrSetAsync<T>(string key, Func<Task<T?>> factory, TimeSpan? expiry = null)
+            where T : class;
     }
 }

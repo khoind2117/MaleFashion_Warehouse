@@ -122,13 +122,13 @@ namespace MaleFashion_Warehouse.Server.Infrastructure.Authentication
             user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(10);
             await _userManager.UpdateAsync(user);
 
-            response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(10)
-            });
+            //response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
+            //{
+            //    HttpOnly = true,
+            //    Secure = true,
+            //    SameSite = SameSiteMode.Strict,
+            //    Expires = DateTime.UtcNow.AddDays(10)
+            //});
 
             return new AuthResponseDto
             {
@@ -154,7 +154,7 @@ namespace MaleFashion_Warehouse.Server.Infrastructure.Authentication
             user.RefreshTokenExpiryTime = DateTime.MinValue;
             await _userManager.UpdateAsync(user);
 
-            response.Cookies.Delete("refreshToken");
+            //response.Cookies.Delete("refreshToken");
 
             return true;
         }

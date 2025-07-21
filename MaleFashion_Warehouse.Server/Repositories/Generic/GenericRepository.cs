@@ -83,7 +83,6 @@ namespace MaleFashion_Warehouse.Server.Repositories.Generic
 
             statusProp.SetValue(entity, status);
             _context.Entry(entity).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
 
             return true;
         }

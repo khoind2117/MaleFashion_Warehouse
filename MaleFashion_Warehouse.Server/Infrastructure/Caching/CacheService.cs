@@ -11,7 +11,10 @@ namespace MaleFashion_Warehouse.Server.Infrastructure.Caching
 
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         private readonly IDatabase _cache;
+
+        /// Prefix to namespace cache keys and avoid key collisions across projects.
         private readonly string _keyPrefix = "mfw-cache:";
+        
         public CacheService(IConnectionMultiplexer connectionMultiplexer)
         {
             _connectionMultiplexer = connectionMultiplexer;
@@ -20,33 +23,61 @@ namespace MaleFashion_Warehouse.Server.Infrastructure.Caching
 
         public async Task<T?> GetAsync<T>(string key) where T : class
         {
-            var value = await _cache.StringGetAsync(_keyPrefix + key);
-            return value.IsNullOrEmpty ? default : JsonSerializer.Deserialize<T>(value);
+            try
+            {
+                var value = await _cache.StringGetAsync(_keyPrefix + key);
+                return value.IsNullOrEmpty ? default : JsonSerializer.Deserialize<T>(value);
+            }
+            catch
+            {
+                return default; // Fail silently if Redis is unavailable
+            }
         }
 
         public async Task SetAsync<T>(string key, T value, TimeSpan? expiry = null) where T : class
         {
-            var json = JsonSerializer.Serialize(value);
-            await _cache.StringSetAsync(_keyPrefix + key, json, expiry);
-
-            _cacheKeys.TryAdd(key, false);
+            try
+            {
+                var json = JsonSerializer.Serialize(value);
+                await _cache.StringSetAsync(_keyPrefix + key, json, expiry);
+                
+                _cacheKeys.TryAdd(_keyPrefix + key, false);
+            }
+            catch
+            {
+                // Fail silently if Redis is unavailable
+            }
         }
 
         public async Task RemoveAsync(string key)
         {
-            await _cache.KeyDeleteAsync(_keyPrefix + key);
-
-            _cacheKeys.TryRemove(key, out bool _);
+            try
+            {
+                await _cache.KeyDeleteAsync(_keyPrefix + key);
+                
+                _cacheKeys.TryRemove(_keyPrefix + key, out _);
+            }
+            catch
+            {
+                // Fail silently if Redis is unavailable
+            }
         }
 
         public async Task RemoveByPrefixAsync(string prefix)
         {
-            IEnumerable<Task> tasks = _cacheKeys
-                .Keys
-                .Where(k => k.StartsWith(_keyPrefix + prefix))
-                .Select(k => RemoveAsync(k));
+            try
+            {
+                    IEnumerable<Task> tasks = _cacheKeys
+                        .Keys
+                        .Where(k => k.StartsWith(_keyPrefix + prefix))
+                        .Select(k => RemoveAsync(k));
             
-            await Task.WhenAll(tasks);
+                    await Task.WhenAll(tasks);
+                }
+            catch 
+            {
+                // Fail silently if Redis is unavailable
+            }
         }
     }
 }

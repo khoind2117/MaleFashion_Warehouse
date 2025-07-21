@@ -204,6 +204,8 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                 };
             }
 
+            await _unitOfWork.SaveChangesAsync();
+
             return new ResponseApi<object>
             {
                 Status = 200,

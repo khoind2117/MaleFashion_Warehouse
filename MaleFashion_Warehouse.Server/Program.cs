@@ -163,8 +163,16 @@ builder.Services.AddRouting(options =>
 #endregion
 
 #region Redis Caching
-builder.Services.AddSingleton<IConnectionMultiplexer>(
-    ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis")));
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var config = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("Redis"), true);
+    config.AbortOnConnectFail = false;
+    config.ConnectRetry = 3;
+    config.ConnectTimeout = 5000;
+    config.Ssl = false;
+
+    return ConnectionMultiplexer.Connect(config);
+});
 
 builder.Services.AddSingleton<ICacheService, CacheService>();
 #endregion

@@ -52,6 +52,8 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
             await _unitOfWork.ProductsRepository.CreateAsync(product);
             await _unitOfWork.SaveChangesAsync();
 
+            await _cacheService.RemoveAsync("products:paged:default");
+
             return await GetByIdAsync(product.Id);
         }
 
@@ -108,6 +110,9 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
             await _unitOfWork.ProductsRepository.UpdateAsync(product);
             await _unitOfWork.SaveChangesAsync();
 
+            await _cacheService.RemoveAsync($"product:id:{id}");
+            await _cacheService.RemoveAsync("products:paged:default");
+
             return new ResponseApi<object>
             {
                 Status = 200,
@@ -132,6 +137,9 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
             await _unitOfWork.ProductsRepository.DeleteAsync(id);
             await _unitOfWork.SaveChangesAsync();
 
+            await _cacheService.RemoveAsync($"product:id:{id}");
+            await _cacheService.RemoveAsync("products:paged:default");
+
             return new ResponseApi<object>
             {
                 Status = 200,
@@ -153,6 +161,11 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                     Message = "Failed to change status",
                 };
             }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            await _cacheService.RemoveAsync($"product:id:{id}");
+            await _cacheService.RemoveAsync("products:paged:default");
 
             return new ResponseApi<object>
             {
@@ -239,6 +252,25 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
             var sortField = pagableRequest.SortBy;
             var sortDirection = pagableRequest.SortDirection;
 
+            var cacheKey = "products:paged:default";
+            bool canCache = criteria?.GetType().GetProperties().Length > 0
+                            && page == 0
+                            && sortField == "updatedDate"
+                            && sortDirection == SortEnum.DESC; 
+            if (canCache)
+            {
+                var cachedData = await _cacheService.GetAsync<PageableResponse<ProductListDto>>(cacheKey);
+                if (cachedData != null)
+                {
+                    return new ResponseApi<PageableResponse<ProductListDto>>
+                    {
+                        Status = 200,
+                        Success = true,
+                        Data = cachedData
+                    };
+                }
+            }
+
             Func<ProductFilterDto?, IQueryable<Product>, IQueryable<Product>>? filter = null;
             if (criteria != null)
             {
@@ -287,6 +319,11 @@ namespace MaleFashion_Warehouse.Server.Services.Implementations
                 Sort = pagedData.Sort,
                 Pageable = pagedData.Pageable
             };
+
+            if (canCache)
+            {
+                await _cacheService.SetAsync(cacheKey, dtoPaged, TimeSpan.FromMinutes(15));
+            }
 
             return new ResponseApi<PageableResponse<ProductListDto>>
             {

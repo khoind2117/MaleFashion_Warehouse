@@ -21,20 +21,18 @@ namespace MaleFashion_Warehouse.Server.Repositories.Generic
         public async Task<TEntity?> CreateAsync(TEntity entity)
         {
             var entry = await _dbSet.AddAsync(entity);
-            await _context.SaveChangesAsync();
             return entry.Entity;
         }
 
-        public async Task<bool> CreateManyAsync(IEnumerable<TEntity> entities)
+        public async Task CreateManyAsync(IEnumerable<TEntity> entities)
         {
             await _dbSet.AddRangeAsync(entities);
-            return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> UpdateAsync(TEntity entity)
+        public Task UpdateAsync(TEntity entity)
         {
             _dbSet.Update(entity);
-            return await _context.SaveChangesAsync() > 0;
+            return Task.CompletedTask;
         }
 
         public async Task<bool> DeleteAsync(object id)
@@ -46,16 +44,18 @@ namespace MaleFashion_Warehouse.Server.Repositories.Generic
             }
 
             _dbSet.Remove(entity);
-            return await _context.SaveChangesAsync() > 0;
+            return true;
         }
 
-        public async Task<bool> DeleteManyAsync(IEnumerable<TEntity> entities)
+        public Task<bool> DeleteManyAsync(IEnumerable<TEntity> entities)
         {
-            if (!entities.Any())
-                return false;
+            if (entities == null || !entities.Any())
+            {
+                return Task.FromResult(false);
+            }
 
             _dbSet.RemoveRange(entities);
-            return await _context.SaveChangesAsync() > 0;
+            return Task.FromResult(true);
         }
 
         public async Task<bool> ChangeStatusAsync<TStatus>(object id, TStatus status)

@@ -7,8 +7,8 @@ namespace MaleFashion_Warehouse.Server.Repositories.Generic
         where TEntity : class
     {
         Task<TEntity?> CreateAsync(TEntity entity);
-        Task<bool> CreateManyAsync(IEnumerable<TEntity> entities);
-        Task<bool> UpdateAsync(TEntity entity);
+        Task CreateManyAsync(IEnumerable<TEntity> entities);
+        Task UpdateAsync(TEntity entity);
         Task<bool> DeleteAsync(object id);
         Task<bool> DeleteManyAsync(IEnumerable<TEntity> entities);
         Task<bool> ChangeStatusAsync<TStatus>(object id, TStatus status)

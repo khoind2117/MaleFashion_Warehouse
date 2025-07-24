@@ -10,7 +10,7 @@ namespace MaleFashion_Warehouse.Server.Repositories.Generic
         Task<bool> CreateManyAsync(IEnumerable<TEntity> entities);
         Task<bool> UpdateAsync(TEntity entity);
         Task<bool> DeleteAsync(object id);
-        Task<bool> DeleteManyAsync(IEnumerable<object> ids);
+        Task<bool> DeleteManyAsync(IEnumerable<TEntity> entities);
         Task<bool> ChangeStatusAsync<TStatus>(object id, TStatus status)
             where TStatus : struct, Enum;
 

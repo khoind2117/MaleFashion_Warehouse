@@ -49,15 +49,10 @@ namespace MaleFashion_Warehouse.Server.Repositories.Generic
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> DeleteManyAsync(IEnumerable<object> ids)
+        public async Task<bool> DeleteManyAsync(IEnumerable<TEntity> entities)
         {
-            var entities = await _dbSet
-                .Where(e => ids.Contains(EF.Property<object>(e, "Id"))).ToListAsync();
-
             if (!entities.Any())
-            {
                 return false;
-            }
 
             _dbSet.RemoveRange(entities);
             return await _context.SaveChangesAsync() > 0;

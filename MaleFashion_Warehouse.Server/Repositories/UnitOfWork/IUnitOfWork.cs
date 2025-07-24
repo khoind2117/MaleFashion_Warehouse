@@ -9,6 +9,7 @@ namespace MaleFashion_Warehouse.Server.Repositories.UnitOfWork
         IProductVariantsRepository ProductVariantsRepository { get; }
         IOrdersRepository OrdersRepository { get; }
         IOrderItemsRepository OrderItemsRepository { get; }
+        ICartsRepository CartsRepository { get; }
         ICartItemsRepository CartItemsRepository { get; }
         IColorsRepository ColorsRepository { get; }
 

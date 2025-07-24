@@ -11,6 +11,7 @@ namespace MaleFashion_Warehouse.Server.Repositories.UnitOfWork
         public IProductVariantsRepository ProductVariantsRepository { get; }
         public IOrdersRepository OrdersRepository { get; }
         public IOrderItemsRepository OrderItemsRepository { get; }
+        public ICartsRepository CartsRepository { get; }
         public ICartItemsRepository CartItemsRepository { get; }
         public IColorsRepository ColorsRepository { get; }
 
@@ -21,6 +22,7 @@ namespace MaleFashion_Warehouse.Server.Repositories.UnitOfWork
             IProductVariantsRepository productVariantsRepository,
             IOrdersRepository ordersRepository,
             IOrderItemsRepository ordersItemsRepository,
+            ICartsRepository cartsRepository,
             ICartItemsRepository cartItemsRepository,
             IColorsRepository colorsRepository
             )
@@ -31,6 +33,7 @@ namespace MaleFashion_Warehouse.Server.Repositories.UnitOfWork
             ProductVariantsRepository = productVariantsRepository;
             OrdersRepository = ordersRepository;
             OrderItemsRepository = ordersItemsRepository;
+            CartsRepository = cartsRepository;
             CartItemsRepository = cartItemsRepository;
             ColorsRepository = colorsRepository;
         }

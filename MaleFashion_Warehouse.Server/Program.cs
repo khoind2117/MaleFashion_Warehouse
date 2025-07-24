@@ -1,4 +1,6 @@
-﻿using MaleFashion_Warehouse.Server.Data;
+﻿using Hangfire;
+using MaleFashion_Warehouse.Server.Data;
+using MaleFashion_Warehouse.Server.Extensions;
 using MaleFashion_Warehouse.Server.Infrastructure.Authentication;
 using MaleFashion_Warehouse.Server.Infrastructure.Caching;
 using MaleFashion_Warehouse.Server.Models.Entities;
@@ -51,7 +53,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-#region ApplicationDbContext
+#region Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -177,6 +179,18 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 builder.Services.AddSingleton<ICacheService, CacheService>();
 #endregion
 
+#region Hangfire Task Scheduling
+builder.Services.AddHangfire(config =>
+{
+    config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.AddHangfireServer(options =>
+{
+    options.SchedulePollingInterval = TimeSpan.FromSeconds(1);
+});
+#endregion
+
 #region Repository and Service Registrations
 // Repositories
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -186,6 +200,7 @@ builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
 builder.Services.AddScoped<IProductVariantsRepository, ProductVariantRepository>();
 builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
 builder.Services.AddScoped<IOrderItemsRepository, OrderItemsRepository>();
+builder.Services.AddScoped<ICartsRepository, CartsRepository>();
 builder.Services.AddScoped<ICartItemsRepository, CartItemsRepository>();
 builder.Services.AddScoped<IColorsRepository, ColorsRepository>();
 
@@ -197,6 +212,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IProductsService, ProductsService>();
 builder.Services.AddScoped<IOrdersService, OrdersService>();
+builder.Services.AddScoped<ICartsService, CartsService>();
 builder.Services.AddScoped<ICartItemsService, CartItemsService>();
 builder.Services.AddScoped<IColorsService, ColorsService>();
 #endregion
@@ -232,6 +248,8 @@ async Task SeedData(IHost app)
 }
 #endregion
 
+app.UseBackgroundJobs();
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -240,6 +258,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    app.UseHangfireDashboard("/hangfire");
 }
 
 app.UseCookiePolicy();
